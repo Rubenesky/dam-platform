@@ -8,6 +8,7 @@ use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use App\Services\GeminiService;
 
 class AssetController extends Controller
 {
@@ -32,20 +33,15 @@ class AssetController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'file' => ['required', 'file', 'max:10240'], // máximo 10MB
+            'file' => ['required', 'file', 'max:10240'],
             'categories' => ['nullable', 'array'],
             'categories.*' => ['exists:categories,id'],
         ]);
 
         $file = $request->file('file');
-
-        // Generamos un nombre único para evitar colisiones
         $filename = Str::uuid() . '.' . $file->getClientOriginalExtension();
-
-        // Guardamos el archivo en storage/app/public/assets
         $path = $file->storeAs('assets', $filename, 'public');
 
-        // Creamos el registro en la base de datos
         $asset = Asset::create([
             'user_id'       => auth()->id(),
             'original_name' => $file->getClientOriginalName(),
@@ -56,19 +52,30 @@ class AssetController extends Controller
             'status'        => 'pending',
         ]);
 
-        // Asignamos categorías si las hay
         if ($request->has('categories')) {
             $asset->categories()->sync($request->categories);
         }
 
-        // Creamos un registro de metadatos vacío esperando la IA
+        // Llamada a Gemini para generar metadatos
+        $gemini = new GeminiService();
+        $metadata = $gemini->generateAssetMetadata(
+            $file->getClientOriginalName(),
+            $file->getMimeType()
+        );
+
         AssetMetadata::create([
             'asset_id'     => $asset->id,
-            'ai_generated' => false,
+            'title'        => $metadata['title'],
+            'description'  => $metadata['description'],
+            'tags'         => $metadata['tags'],
+            'ai_generated' => true,
         ]);
 
+        // Marcamos el asset como procesado
+        $asset->update(['status' => 'processed']);
+
         return redirect()->route('assets.show', $asset)
-                         ->with('success', 'Asset subido correctamente.');
+                        ->with('success', 'Asset subido y metadatos generados por IA.');
     }
 
     // Ver un asset individual
