@@ -23,6 +23,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
     ];
 
     /**
@@ -55,5 +56,29 @@ class User extends Authenticatable
     public function activityLogs(): HasMany
     {
         return $this->hasMany(ActivityLog::class);
+    }
+    // Comprueba si el usuario es admin
+    
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
+    // Comprueba si el usuario es editor
+    public function isEditor(): bool
+    {
+        return $this->role === 'editor';
+    }
+
+    // Comprueba si el usuario es viewer
+    public function isViewer(): bool
+    {
+        return $this->role === 'viewer';
+    }
+
+    // Comprueba si el usuario tiene al menos un rol determinado
+    public function hasRole(string $role): bool
+    {
+        return $this->role === $role;
     }
 }
