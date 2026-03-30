@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ActivityLog extends Model
 {
+    protected $table = 'activity_log';
+
     protected $fillable = [
         'user_id',
         'action',
@@ -20,10 +22,8 @@ class ActivityLog extends Model
         'metadata' => 'array',
     ];
 
-    // Solo tenemos created_at, no updated_at
     const UPDATED_AT = null;
 
-    // El log pertenece a un usuario
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

@@ -5,13 +5,16 @@ namespace App\Http\Controllers;
 use App\Models\Asset;
 use App\Models\AssetMetadata;
 use App\Models\Category;
+use App\Services\GeminiService;
+use App\Traits\LogsActivity;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use App\Services\GeminiService;
 
 class AssetController extends Controller
 {
+    use LogsActivity;
+
     // Listar todos los assets
     public function index()
     {
@@ -71,11 +74,12 @@ class AssetController extends Controller
             'ai_generated' => true,
         ]);
 
-        // Marcamos el asset como procesado
         $asset->update(['status' => 'processed']);
 
+        $this->logActivity('upload', $asset, ['filename' => $asset->original_name]);
+
         return redirect()->route('assets.show', $asset)
-                        ->with('success', 'Asset subido y metadatos generados por IA.');
+                         ->with('success', 'Asset subido y metadatos generados por IA.');
     }
 
     // Ver un asset individual
@@ -104,7 +108,6 @@ class AssetController extends Controller
             $asset->categories()->sync($request->categories);
         }
 
-        // Actualizamos los metadatos
         $asset->metadata()->updateOrCreate(
             ['asset_id' => $asset->id],
             [
@@ -115,6 +118,8 @@ class AssetController extends Controller
             ]
         );
 
+        $this->logActivity('edit', $asset);
+
         return redirect()->route('assets.show', $asset)
                          ->with('success', 'Asset actualizado correctamente.');
     }
@@ -122,10 +127,10 @@ class AssetController extends Controller
     // Borrar el asset
     public function destroy(Asset $asset)
     {
-        // Borramos el archivo físico del disco
         Storage::disk('public')->delete($asset->path);
 
-        // Borramos el registro de la BD (cascade borra metadata)
+        $this->logActivity('delete', null, ['filename' => $asset->original_name]);
+
         $asset->delete();
 
         return redirect()->route('assets.index')
