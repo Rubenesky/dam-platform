@@ -19,11 +19,11 @@
                         Assets
                     </x-nav-link>
                     {{-- Categorías se activa cuando esté el CRUD listo --}}
-                    {{-- @if(auth()->user()->isAdmin())
+                    @if(auth()->user()->isAdmin())
                     <x-nav-link :href="route('categories.index')" :active="request()->routeIs('categories.*')">
                         Categorías
                     </x-nav-link>
-                    @endif --}}
+                    @endif
                 </div>
             </div>
 

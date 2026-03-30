@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AssetController;
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -29,13 +30,19 @@ Route::middleware('auth')->group(function () {
         Route::patch('/assets/{asset}', [AssetController::class, 'update'])->name('assets.update');
     });
 
-    // Solo admins pueden borrar
+    // Solo admins pueden borrar assets
     Route::middleware('role:admin')->group(function () {
         Route::delete('/assets/{asset}', [AssetController::class, 'destroy'])->name('assets.destroy');
     });
 
     // Ver asset individual — al final para no interceptar /create
     Route::get('/assets/{asset}', [AssetController::class, 'show'])->name('assets.show');
+
+    // Categorías — solo admins
+    Route::middleware('role:admin')->group(function () {
+        Route::resource('categories', CategoryController::class)
+             ->except(['show']);
+    });
 });
 
 require __DIR__.'/auth.php';
