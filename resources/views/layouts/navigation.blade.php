@@ -18,10 +18,12 @@
                     <x-nav-link :href="route('assets.index')" :active="request()->routeIs('assets.*')">
                         Assets
                     </x-nav-link>
-                    {{-- Categorías se activa cuando esté el CRUD listo --}}
                     @if(auth()->user()->isAdmin())
                     <x-nav-link :href="route('categories.index')" :active="request()->routeIs('categories.*')">
                         Categorías
+                    </x-nav-link>
+                    <x-nav-link :href="route('admin.users.index')" :active="request()->routeIs('admin.*')">
+                        Usuarios
                     </x-nav-link>
                     @endif
                 </div>
@@ -82,6 +84,14 @@
             <x-responsive-nav-link :href="route('assets.index')" :active="request()->routeIs('assets.*')">
                 Assets
             </x-responsive-nav-link>
+            @if(auth()->user()->isAdmin())
+            <x-responsive-nav-link :href="route('categories.index')" :active="request()->routeIs('categories.*')">
+                Categorías
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('admin.users.index')" :active="request()->routeIs('admin.*')">
+                Usuarios
+            </x-responsive-nav-link>
+            @endif
         </div>
 
         <!-- Responsive Settings Options -->
