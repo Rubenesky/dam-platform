@@ -4,14 +4,20 @@
             <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
                 Assets
             </h2>
-            @can('create', App\Models\Asset::class)
-            @endcan
-            @if(auth()->user()->isAdmin() || auth()->user()->isEditor())
-            <a href="{{ route('assets.create') }}"
-               class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
-                + Subir asset
-            </a>
-            @endif
+            <div class="flex gap-3">
+                @if(auth()->user()->isAdmin())
+                <a href="{{ route('export.assets') }}"
+                class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
+                    ↓ Exportar Excel
+                </a>
+                @endif
+                @if(auth()->user()->isAdmin() || auth()->user()->isEditor())
+                <a href="{{ route('assets.create') }}"
+                class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                    + Subir asset
+                </a>
+                @endif
+            </div>
         </div>
     </x-slot>
 
