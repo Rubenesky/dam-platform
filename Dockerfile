@@ -19,6 +19,7 @@ COPY . .
 RUN composer install --no-dev --optimize-autoloader --ignore-platform-reqs
 RUN npm install && npm run build
 RUN cp .env.example .env && php artisan key:generate
+CMD php artisan migrate --force && apache2-foreground
 
 RUN chown -R www-data:www-data storage bootstrap/cache
 
