@@ -15,6 +15,32 @@ Plataforma web de gestión de activos digitales desarrollada con Laravel 10, con
 - **Activity log** — registro de todas las acciones de los usuarios
 - **Tests** — suite de tests de control de acceso con PHPUnit
 
+## 📸 Capturas de pantalla
+
+### Dashboard
+![Dashboard](screenshots/01-dashboard.png)
+
+### Listado de assets
+![Assets](screenshots/02-assets-list.png)
+
+### Detalle de asset con metadatos generados por IA
+![Asset Detail](screenshots/03-asset-detail-ai.png)
+
+### Subida de asset
+![Upload](screenshots/04-asset-upload.png)
+
+### Panel de administración de usuarios
+![Admin Users](screenshots/05-admin-users.png)
+
+### Gestión de categorías
+![Categories](screenshots/06-categories.png)
+
+### API REST en Postman
+![API](screenshots/07-api-postman.png)
+
+### Exportación a Excel
+![Excel](screenshots/08-excel-export.png)
+
 ## 🛠️ Stack tecnológico
 
 | Capa | Tecnología |
