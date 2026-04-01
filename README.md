@@ -18,28 +18,28 @@ Plataforma web de gestión de activos digitales desarrollada con Laravel 10, con
 ## 📸 Capturas de pantalla
 
 ### Dashboard
-![Dashboard](screenshots/01-dashboard.png)
+![Dashboard](screenshots/01-dashboard.jpg)
 
 ### Listado de assets
-![Assets](screenshots/02-assets-list.png)
+![Assets](screenshots/02-assets-list.jpg)
 
 ### Detalle de asset con metadatos generados por IA
-![Asset Detail](screenshots/03-asset-detail-ai.png)
+![Asset Detail](screenshots/03-asset-detail-ai.jpg)
 
 ### Subida de asset
-![Upload](screenshots/04-asset-upload.png)
+![Upload](screenshots/04-asset-upload.jpg)
 
 ### Panel de administración de usuarios
-![Admin Users](screenshots/05-admin-users.png)
+![Admin Users](screenshots/05-admin-users.jpg)
 
 ### Gestión de categorías
-![Categories](screenshots/06-categories.png)
+![Categories](screenshots/06-categories.jpg)
 
 ### API REST en Postman
-![API](screenshots/07-api-postman.png)
+![API](screenshots/07-api-postman.jpg)
 
 ### Exportación a Excel
-![Excel](screenshots/08-excel-export.png)
+![Excel](screenshots/08-excel-export.jpg)
 
 ## 🛠️ Stack tecnológico
 
