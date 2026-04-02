@@ -16,13 +16,36 @@ class AssetController extends Controller
     use LogsActivity;
 
     // Listar todos los assets
-    public function index()
+    public function index(Request $request)
     {
-        $assets = Asset::with(['user', 'metadata', 'categories'])
-                       ->latest()
-                       ->paginate(12);
+        $query = Asset::with(['user', 'metadata', 'categories']);
 
-        return view('assets.index', compact('assets'));
+        // Búsqueda por nombre
+        if ($request->filled('search')) {
+            $query->where('original_name', 'like', '%' . $request->search . '%');
+        }
+
+        // Filtro por tipo
+        if ($request->filled('type')) {
+            $query->where('mime_type', 'like', $request->type . '%');
+        }
+
+        // Filtro por estado
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // Filtro por categoría
+        if ($request->filled('category')) {
+            $query->whereHas('categories', function ($q) use ($request) {
+                $q->where('categories.id', $request->category);
+            });
+        }
+
+        $assets = $query->latest()->paginate(12)->withQueryString();
+        $categories = Category::whereNull('parent_id')->with('children')->get();
+
+        return view('assets.index', compact('assets', 'categories'));
     }
 
     // Mostrar formulario de subida
