@@ -44,6 +44,14 @@ class AssetApiController extends Controller
     // DELETE /api/assets/{id}
     public function destroy(Asset $asset): JsonResponse
     {
+
+        if (auth()->user()->role !== 'admin') {
+            return response()->json([
+                'success' => false,
+                'message' => 'No tienes permiso para eliminar assets.',
+            ], 403);
+        }
+
         $asset->delete();
 
         return response()->json([
