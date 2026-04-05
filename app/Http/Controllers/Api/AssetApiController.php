@@ -4,11 +4,18 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Asset;
+use App\Models\AssetMetadata;
+use App\Services\GeminiService;
+use App\Traits\LogsActivity;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class AssetApiController extends Controller
 {
+    use LogsActivity;
+
     // GET /api/assets
     public function index(): JsonResponse
     {
@@ -30,6 +37,50 @@ class AssetApiController extends Controller
         ]);
     }
 
+    // POST /api/assets
+    public function store(Request $request): JsonResponse
+    {
+        $request->validate([
+            'file' => ['required', 'file', 'max:10240'],
+        ]);
+
+        $file     = $request->file('file');
+        $filename = Str::uuid() . '.' . $file->getClientOriginalExtension();
+        $path     = $file->storeAs('assets', $filename, 'public');
+
+        $asset = Asset::create([
+            'user_id'       => auth()->id(),
+            'original_name' => $file->getClientOriginalName(),
+            'filename'      => $filename,
+            'mime_type'     => $file->getMimeType(),
+            'size'          => $file->getSize(),
+            'path'          => $path,
+            'status'        => 'pending',
+        ]);
+
+        $gemini   = new GeminiService();
+        $metadata = $gemini->generateAssetMetadata(
+            $file->getClientOriginalName(),
+            $file->getMimeType()
+        );
+
+        AssetMetadata::create([
+            'asset_id'     => $asset->id,
+            'title'        => $metadata['title'],
+            'description'  => $metadata['description'],
+            'tags'         => $metadata['tags'],
+            'ai_generated' => true,
+        ]);
+
+        $asset->update(['status' => 'processed']);
+        $this->logActivity('upload', $asset, ['filename' => $asset->original_name]);
+
+        return response()->json([
+            'success' => true,
+            'data'    => $this->formatAsset($asset->fresh(['user', 'metadata', 'categories'])),
+        ], 201);
+    }
+
     // GET /api/assets/{id}
     public function show(Asset $asset): JsonResponse
     {
@@ -44,7 +95,6 @@ class AssetApiController extends Controller
     // DELETE /api/assets/{id}
     public function destroy(Asset $asset): JsonResponse
     {
-
         if (auth()->user()->role !== 'admin') {
             return response()->json([
                 'success' => false,
@@ -52,6 +102,8 @@ class AssetApiController extends Controller
             ], 403);
         }
 
+        Storage::disk('public')->delete($asset->path);
+        $this->logActivity('delete', null, ['filename' => $asset->original_name]);
         $asset->delete();
 
         return response()->json([

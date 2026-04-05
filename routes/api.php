@@ -28,6 +28,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Assets API
     Route::get('/assets', [AssetApiController::class, 'index']);
+    Route::post('/assets', [AssetApiController::class, 'store']);
     Route::get('/assets/{asset}', [AssetApiController::class, 'show']);
     Route::delete('/assets/{asset}', [AssetApiController::class, 'destroy']);
 });
