@@ -5,8 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Asset;
 use App\Models\AssetMetadata;
-use App\Services\GeminiService;
 use App\Services\DuplicateDetectionService;
+use App\Services\GeminiService;
 use App\Traits\LogsActivity;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -79,7 +79,7 @@ class AssetApiController extends Controller
 
         // Detección de duplicados
         $duplicateDetector = new DuplicateDetectionService();
-        $similarAssets = $duplicateDetector->findSimilar(
+        $similarAssets     = $duplicateDetector->findSimilar(
             $asset->id,
             $metadata['description'] ?? '',
             $metadata['tags'] ?? []
@@ -101,6 +101,33 @@ class AssetApiController extends Controller
         return response()->json([
             'success' => true,
             'data'    => $this->formatAsset($asset),
+        ]);
+    }
+
+    // PATCH /api/assets/{id}
+    public function update(Request $request, Asset $asset): JsonResponse
+    {
+        $request->validate([
+            'title'       => ['nullable', 'string', 'max:255'],
+            'description' => ['nullable', 'string'],
+            'tags'        => ['nullable', 'string'],
+        ]);
+
+        $asset->metadata()->updateOrCreate(
+            ['asset_id' => $asset->id],
+            [
+                'title'        => $request->title,
+                'description'  => $request->description,
+                'tags'         => $request->tags ? array_map('trim', explode(',', $request->tags)) : null,
+                'ai_generated' => false,
+            ]
+        );
+
+        $this->logActivity('edit', $asset);
+
+        return response()->json([
+            'success' => true,
+            'data'    => $this->formatAsset($asset->fresh(['user', 'metadata', 'categories'])),
         ]);
     }
 
