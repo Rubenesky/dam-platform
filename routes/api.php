@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AssetApiController;
 use App\Http\Controllers\Api\AuthApiController;
+use App\Http\Controllers\Api\SearchApiController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -31,4 +32,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/assets', [AssetApiController::class, 'store']);
     Route::get('/assets/{asset}', [AssetApiController::class, 'show']);
     Route::delete('/assets/{asset}', [AssetApiController::class, 'destroy']);
+
+    // Búsqueda por lenguaje natural
+    Route::post('/search', [SearchApiController::class, 'search']);
 });
