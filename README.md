@@ -17,37 +17,41 @@ Plataforma web de gestión de activos digitales desarrollada con Laravel 10, con
 
 ## 📸 Capturas de pantalla
 
-### Dashboard
+### Dashboard con estadísticas y gráficos
 
 ![Dashboard](screenshots/01-dashboard.jpg)
 
-### Listado de assets
+### Listado de assets con filtros
 
-![Assets](screenshots/02-assets-list.jpg)
+![Assets](screenshots/03-assets-list.jpg)
 
-### Detalle de asset con metadatos generados por IA
+### ✨ Gemini Vision — Análisis visual real de imágenes
 
-![Asset Detail](screenshots/03-asset-detail-ai.jpg)
+![Gemini Vision Detail](screenshots/07-gemini-vision-detail.jpg)
 
-### Subida de asset
+### ✨ Gemini Vision — Otro ejemplo
 
-![Upload](screenshots/04-asset-upload.jpg)
+![Gemini Vision Example](screenshots/09-gemini-vision-example2.jpg)
+
+### Vista detalle con metadatos generados por IA
+
+![Asset Detail](screenshots/04-asset-detail-ai.jpg)
 
 ### Panel de administración de usuarios
 
-![Admin Users](screenshots/05-admin-users.jpg)
+![Admin Users](screenshots/08-admin-users.jpg)
 
 ### Gestión de categorías
 
-![Categories](screenshots/06-categories.jpg)
+![Categories](screenshots/11-categories.jpg)
 
 ### API REST en Postman
 
-![API](screenshots/07-api-postman.jpg)
+![API Postman](screenshots/12-api-postman.jpg)
 
 ### Exportación a Excel
 
-![Excel](screenshots/08-excel-export.jpg)
+![Excel Export](screenshots/14-excel-export.jpg)
 
 ## 🛠️ Stack tecnológico
 
