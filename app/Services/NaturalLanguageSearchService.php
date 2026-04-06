@@ -18,22 +18,51 @@ class NaturalLanguageSearchService
 
     public function parseQuery(string $userQuery): array
     {
-        $prompt = "Eres un asistente que convierte búsquedas en lenguaje natural a filtros estructurados para una plataforma de gestión de activos digitales.
+        $prompt = "Eres un asistente experto en búsqueda de activos digitales. Tu tarea es convertir búsquedas en lenguaje natural a filtros estructurados.
 
-Los filtros disponibles son:
-- search: texto para buscar en el nombre o título del archivo
-- type: tipo de archivo ('image' para imágenes, 'application/pdf' para PDFs, 'video' para vídeos)
-- status: estado del archivo ('processed' o 'pending')
-- date_from: fecha desde (formato Y-m-d)
-- date_to: fecha hasta (formato Y-m-d)
+    FILTROS DISPONIBLES:
+    - search: palabra clave para buscar. REGLAS IMPORTANTES:
+    * Usa siempre la RAÍZ de la palabra (sin plural, sin sufijos)
+    * Ejemplos: 'paisajes'→'paisaj', 'montañas'→'montaña', 'logos'→'logo', 'fotografías'→'fotograf', 'edificios'→'edifici', 'personas'→'person', 'animales'→'animal', 'coches'→'coche', 'árboles'→'árbol'
+    * Si hay varias palabras clave elige la MÁS ESPECÍFICA
+    * Ignora palabras genéricas como 'archivo', 'imagen', 'foto', 'documento', 'fichero'
+    - type: SOLO estos valores exactos:
+    * 'image' → cuando el usuario mencione: imagen, foto, fotografía, ilustración, captura, screenshot, png, jpg, jpeg, gif, svg, avif, webp
+    * 'application/pdf' → cuando mencione: pdf, documento pdf, archivo pdf
+    * 'video' → cuando mencione: vídeo, video, mp4, mov, avi
+    * No incluir si no está claro el tipo
+    - status: SOLO 'processed' o 'pending'
+    * 'processed' → procesado, procesada, con metadatos, analizado
+    * 'pending' → pendiente, sin procesar, sin analizar
+    * No incluir si no se menciona
+    - date_from: fecha de inicio en formato Y-m-d
+    * 'hoy' → " . now()->format('Y-m-d') . "
+    * 'esta semana' → " . now()->startOfWeek()->format('Y-m-d') . "
+    * 'este mes' → " . now()->startOfMonth()->format('Y-m-d') . "
+    * 'este año' → " . now()->startOfYear()->format('Y-m-d') . "
+    * 'ayer' → " . now()->subDay()->format('Y-m-d') . "
+    * 'última semana' → " . now()->subWeek()->format('Y-m-d') . "
+    * 'último mes' → " . now()->subMonth()->format('Y-m-d') . "
+    - date_to: fecha fin en formato Y-m-d (solo si se especifica un rango)
 
-Hoy es " . now()->format('Y-m-d') . ".
+    EJEMPLOS DE BÚSQUEDAS Y RESULTADOS ESPERADOS:
+    - 'fotos de montañas' → {\"type\": \"image\", \"search\": \"montaña\"}
+    - 'imágenes de paisajes subidas esta semana' → {\"type\": \"image\", \"search\": \"paisaj\", \"date_from\": \"" . now()->startOfWeek()->format('Y-m-d') . "\"}
+    - 'documentos pdf pendientes' → {\"type\": \"application/pdf\", \"status\": \"pending\"}
+    - 'logos de empresas procesados' → {\"type\": \"image\", \"search\": \"logo\", \"status\": \"processed\"}
+    - 'fotos subidas hoy' → {\"type\": \"image\", \"date_from\": \"" . now()->format('Y-m-d') . "\"}
+    - 'archivos de este mes' → {\"date_from\": \"" . now()->startOfMonth()->format('Y-m-d') . "\"}
+    - 'imágenes de personas sonriendo' → {\"type\": \"image\", \"search\": \"person\"}
+    - 'capturas de pantalla' → {\"type\": \"image\", \"search\": \"captura\"}
+    - 'vídeos recientes' → {\"type\": \"video\", \"date_from\": \"" . now()->subWeek()->format('Y-m-d') . "\"}
 
-El usuario busca: \"{$userQuery}\"
+    REGLAS GENERALES:
+    - Responde SOLO con JSON válido, sin explicaciones ni markdown
+    - Solo incluye los filtros que apliquen claramente
+    - Si la búsqueda es ambigua, usa solo 'search' con la palabra más relevante
+    - Nunca inventes filtros que no estén en la lista
 
-Responde SOLO con un JSON con los filtros aplicables. Si un filtro no aplica no lo incluyas.
-Ejemplo: {\"type\": \"image\", \"search\": \"paisaje\"}
-Solo JSON, sin explicaciones ni markdown.";
+    El usuario busca: \"{$userQuery}\"";
 
         try {
             $response = Http::post("{$this->apiUrl}?key={$this->apiKey}", [

@@ -22,6 +22,14 @@ class SearchApiController extends Controller
         $nlSearch = new NaturalLanguageSearchService();
         $filters  = $nlSearch->parseQuery($userQuery);
 
+        // Si Gemini falló y no devolvió filtros, indicarlo
+        if (empty($filters)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No se pudo procesar la búsqueda. Inténtalo de nuevo en unos segundos.',
+            ], 503);
+        }
+
         // Construir la consulta con los filtros
         $query = Asset::with(['user', 'metadata', 'categories']);
 
@@ -31,7 +39,8 @@ class SearchApiController extends Controller
                 $q->where('original_name', 'like', "%{$search}%")
                   ->orWhereHas('metadata', function ($q) use ($search) {
                       $q->where('title', 'like', "%{$search}%")
-                        ->orWhere('description', 'like', "%{$search}%");
+                        ->orWhere('description', 'like', "%{$search}%")
+                        ->orWhere('tags', 'like', "%{$search}%");
                   });
             });
         }
