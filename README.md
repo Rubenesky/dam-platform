@@ -18,51 +18,61 @@ Plataforma web de gestión de activos digitales desarrollada con Laravel 10, con
 ## 📸 Capturas de pantalla
 
 ### Dashboard
+
 ![Dashboard](screenshots/01-dashboard.jpg)
 
 ### Listado de assets
+
 ![Assets](screenshots/02-assets-list.jpg)
 
 ### Detalle de asset con metadatos generados por IA
+
 ![Asset Detail](screenshots/03-asset-detail-ai.jpg)
 
 ### Subida de asset
+
 ![Upload](screenshots/04-asset-upload.jpg)
 
 ### Panel de administración de usuarios
+
 ![Admin Users](screenshots/05-admin-users.jpg)
 
 ### Gestión de categorías
+
 ![Categories](screenshots/06-categories.jpg)
 
 ### API REST en Postman
+
 ![API](screenshots/07-api-postman.jpg)
 
 ### Exportación a Excel
+
 ![Excel](screenshots/08-excel-export.jpg)
 
 ## 🛠️ Stack tecnológico
 
-| Capa | Tecnología |
-|------|-----------|
-| Backend | Laravel 10 (PHP 8.1) |
-| Frontend | Blade + Alpine.js + Tailwind CSS |
-| Base de datos | MySQL |
-| Autenticación API | Laravel Sanctum |
-| IA | Google Gemini API |
-| Gráficos | Chart.js |
-| Tests | PHPUnit |
-| Control de versiones | Git + GitHub |
+| Capa                 | Tecnología                       |
+| -------------------- | -------------------------------- |
+| Backend              | Laravel 10 (PHP 8.1)             |
+| Frontend             | Blade + Alpine.js + Tailwind CSS |
+| Base de datos        | MySQL                            |
+| Autenticación API    | Laravel Sanctum                  |
+| IA                   | Google Gemini API                |
+| Gráficos             | Chart.js                         |
+| Tests                | PHPUnit                          |
+| Control de versiones | Git + GitHub                     |
 
 ## ⚙️ Instalación local
 
 ### Requisitos previos
+
 - PHP 8.1+
 - Composer
 - MySQL
 - Node.js y npm
 
 ### Pasos
+
 ```bash
 # 1. Clonar el repositorio
 git clone https://github.com/Rubenesky/dam-platform.git
@@ -103,31 +113,51 @@ php artisan serve
 
 ## 🔐 Roles y permisos
 
-| Acción | Admin | Editor | Viewer |
-|--------|-------|--------|--------|
-| Ver assets | ✅ | ✅ | ✅ |
-| Subir assets | ✅ | ✅ | ❌ |
-| Editar assets | ✅ | ✅ | ❌ |
-| Borrar assets | ✅ | ❌ | ❌ |
-| Gestionar categorías | ✅ | ❌ | ❌ |
-| Gestionar usuarios | ✅ | ❌ | ❌ |
-| Acceso a API | ✅ | ✅ | ✅ |
+| Acción               | Admin | Editor | Viewer |
+| -------------------- | ----- | ------ | ------ |
+| Ver assets           | ✅    | ✅     | ✅     |
+| Subir assets         | ✅    | ✅     | ❌     |
+| Editar assets        | ✅    | ✅     | ❌     |
+| Borrar assets        | ✅    | ❌     | ❌     |
+| Gestionar categorías | ✅    | ❌     | ❌     |
+| Gestionar usuarios   | ✅    | ❌     | ❌     |
+| Acceso a API         | ✅    | ✅     | ✅     |
 
-## 🤖 Integración con IA
+## 🤖 Integración con IA — Gemini Vision
 
-Al subir un archivo, la plataforma realiza automáticamente una llamada a la API de Google Gemini que analiza el nombre y tipo del archivo y genera:
+Al subir un archivo, la plataforma realiza automáticamente un análisis con Google Gemini:
+
+### Para imágenes — Análisis visual real
+
+La IA analiza el **contenido visual real** de la imagen, no solo el nombre del archivo. Describe objetos, colores, estilos, contexto y genera metadatos precisos basados en lo que realmente ve.
+
+**Ejemplo real:**
+
+- Archivo subido: `altas-montanas-colinas-cubiertas-bosques.avif`
+- Título generado: _"Paisaje alpino con picos rocosos, bosque y riachuelo"_
+- Descripción generada: _"Un vibrante paisaje montañoso con picos rocosos y un cielo azul profundo. Un valle verde y dorado con un riachuelo y un puente de madera cruza el primer plano, flanqueado por densos bosques de coníferas"_
+- Tags generados: `montañas`, `paisaje`, `bosque`, `valle`, `riachuelo`
+
+### Para otros archivos — Análisis por nombre y tipo
+
+Para PDFs, documentos y otros formatos, la IA genera metadatos basados en el nombre y tipo del archivo.
+
+### Metadatos generados automáticamente
 
 - **Título** descriptivo (máximo 60 caracteres)
-- **Descripción** útil (máximo 200 caracteres)
+- **Descripción** detallada (máximo 200 caracteres)
 - **Etiquetas** relevantes en español (3-5 tags)
 
 El usuario puede editar estos metadatos después de la subida. Los metadatos generados por IA se marcan con el indicador ✨ en la interfaz.
+
+Esta tecnología es similar a la que usan plataformas como Freepik internamente para indexar y clasificar millones de recursos digitales.
 
 ## 🌐 API REST
 
 La API usa autenticación por token con Laravel Sanctum.
 
 ### Autenticación
+
 ```http
 POST /api/login
 Content-Type: application/json
@@ -139,6 +169,7 @@ Content-Type: application/json
 ```
 
 Respuesta:
+
 ```json
 {
     "success": true,
@@ -154,22 +185,24 @@ Respuesta:
 
 ### Endpoints disponibles
 
-| Método | Endpoint | Descripción |
-|--------|----------|-------------|
-| POST | `/api/login` | Obtener token de acceso |
-| POST | `/api/logout` | Cerrar sesión |
-| GET | `/api/user` | Datos del usuario autenticado |
-| GET | `/api/assets` | Listar assets (paginado) |
-| GET | `/api/assets/{id}` | Ver un asset |
-| DELETE | `/api/assets/{id}` | Eliminar un asset |
+| Método | Endpoint           | Descripción                   |
+| ------ | ------------------ | ----------------------------- |
+| POST   | `/api/login`       | Obtener token de acceso       |
+| POST   | `/api/logout`      | Cerrar sesión                 |
+| GET    | `/api/user`        | Datos del usuario autenticado |
+| GET    | `/api/assets`      | Listar assets (paginado)      |
+| GET    | `/api/assets/{id}` | Ver un asset                  |
+| DELETE | `/api/assets/{id}` | Eliminar un asset             |
 
 ### Ejemplo de petición autenticada
+
 ```http
 GET /api/assets
 Authorization: Bearer 1|abc123...
 ```
 
 Respuesta:
+
 ```json
 {
     "success": true,
@@ -202,6 +235,7 @@ Respuesta:
 ```
 
 ## 🧪 Tests
+
 ```bash
 # Ejecutar todos los tests
 php artisan test
@@ -211,6 +245,7 @@ php artisan test --filter AssetTest
 ```
 
 ## 📁 Estructura del proyecto
+
 ```
 app/
 ├── Http/
