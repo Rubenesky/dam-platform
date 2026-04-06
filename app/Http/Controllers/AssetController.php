@@ -6,6 +6,7 @@ use App\Models\Asset;
 use App\Models\AssetMetadata;
 use App\Models\Category;
 use App\Services\GeminiService;
+use App\Services\DuplicateDetectionService;
 use App\Traits\LogsActivity;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -99,11 +100,24 @@ class AssetController extends Controller
         ]);
 
         $asset->update(['status' => 'processed']);
-
         $this->logActivity('upload', $asset, ['filename' => $asset->original_name]);
 
+        // Detección de duplicados
+        $duplicateDetector = new DuplicateDetectionService();
+        $similarAssets = $duplicateDetector->findSimilar(
+            $asset->id,
+            $metadata['description'] ?? '',
+            $metadata['tags'] ?? []
+        );
+
+        if (!empty($similarAssets)) {
+            $similarIds = collect($similarAssets)->pluck('id')->join(', #');
+            return redirect()->route('assets.show', $asset)
+                            ->with('warning', "Asset subido. ⚠️ Se detectaron assets similares: #{$similarIds}");
+        }
+
         return redirect()->route('assets.show', $asset)
-                         ->with('success', 'Asset subido y metadatos generados por IA.');
+                        ->with('success', 'Asset subido y metadatos generados por IA.');
     }
 
     // Ver un asset individual

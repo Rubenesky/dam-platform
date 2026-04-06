@@ -35,6 +35,12 @@
             </div>
             @endif
 
+            @if(session('warning'))
+            <div class="mb-4 p-4 bg-yellow-100 text-yellow-800 rounded-lg">
+                {{ session('warning') }}
+            </div>
+            @endif
+
             {{-- Previsualización --}}
             <div class="bg-white dark:bg-gray-800 shadow rounded-xl p-6">
                 @if(str_starts_with($asset->mime_type, 'image/'))
