@@ -83,10 +83,11 @@ class AssetController extends Controller
         }
 
         // Llamada a Gemini para generar metadatos
-        $gemini = new GeminiService();
+        $gemini   = new GeminiService();
         $metadata = $gemini->generateAssetMetadata(
             $file->getClientOriginalName(),
-            $file->getMimeType()
+            $file->getMimeType(),
+            $path
         );
 
         AssetMetadata::create([

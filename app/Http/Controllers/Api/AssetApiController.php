@@ -61,7 +61,8 @@ class AssetApiController extends Controller
         $gemini   = new GeminiService();
         $metadata = $gemini->generateAssetMetadata(
             $file->getClientOriginalName(),
-            $file->getMimeType()
+            $file->getMimeType(),
+            $path
         );
 
         AssetMetadata::create([
