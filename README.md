@@ -131,24 +131,34 @@ php artisan serve
 | Gestionar usuarios   | ✅    | ❌     | ❌     |
 | Acceso a API         | ✅    | ✅     | ✅     |
 
-## 🤖 Integración con IA — Gemini Vision
+## 🤖 Integración con IA — Tres sistemas Gemini trabajando juntos
 
-Al subir un archivo, la plataforma realiza automáticamente un análisis con Google Gemini:
+### 1. Gemini Vision — Análisis visual real de imágenes
 
-### Para imágenes — Análisis visual real
-
-La IA analiza el **contenido visual real** de la imagen, no solo el nombre del archivo. Describe objetos, colores, estilos, contexto y genera metadatos precisos basados en lo que realmente ve.
+Al subir una imagen, la IA analiza el **contenido visual real**, no el nombre del archivo. Describe objetos, colores, estilos y contexto.
 
 **Ejemplo real:**
 
-- Archivo subido: `altas-montanas-colinas-cubiertas-bosques.avif`
+- Archivo: `altas-montanas-colinas-cubiertas-bosques.avif`
 - Título generado: _"Paisaje alpino con picos rocosos, bosque y riachuelo"_
-- Descripción generada: _"Un vibrante paisaje montañoso con picos rocosos y un cielo azul profundo. Un valle verde y dorado con un riachuelo y un puente de madera cruza el primer plano, flanqueado por densos bosques de coníferas"_
-- Tags generados: `montañas`, `paisaje`, `bosque`, `valle`, `riachuelo`
+- Descripción: _"Un vibrante paisaje montañoso con picos rocosos y un cielo azul profundo..."_
+- Tags: `montañas`, `paisaje`, `bosque`, `valle`, `riachuelo`
 
-### Para otros archivos — Análisis por nombre y tipo
+### 2. Gemini NL2Query — Búsqueda por lenguaje natural
 
-Para PDFs, documentos y otros formatos, la IA genera metadatos basados en el nombre y tipo del archivo.
+El usuario escribe en lenguaje humano y la IA convierte la búsqueda en filtros estructurados de base de datos.
+
+**Ejemplos:**
+
+- _"muéstrame imágenes de montañas"_ → `{type: image, search: montaña}`
+- _"pdfs subidos esta semana"_ → `{type: application/pdf, date_from: 2026-03-30}`
+- _"imágenes procesadas de paisajes"_ → `{type: image, search: paisaj, status: processed}`
+
+Endpoint: `POST /api/search` con `{"query": "tu búsqueda en lenguaje natural"}`
+
+### 3. Gemini Duplicate Detection — Detección de duplicados
+
+Al subir un asset, la IA compara su descripción y tags con todos los assets existentes. Si detecta similitud superior al 70% avisa al usuario con el porcentaje de similitud y el motivo.
 
 ### Metadatos generados automáticamente
 
@@ -156,9 +166,9 @@ Para PDFs, documentos y otros formatos, la IA genera metadatos basados en el nom
 - **Descripción** detallada (máximo 200 caracteres)
 - **Etiquetas** relevantes en español (3-5 tags)
 
-El usuario puede editar estos metadatos después de la subida. Los metadatos generados por IA se marcan con el indicador ✨ en la interfaz.
+El usuario puede editar los metadatos. Los generados por IA se marcan con ✨ en la interfaz.
 
-Esta tecnología es similar a la que usan plataformas como Freepik internamente para indexar y clasificar millones de recursos digitales.
+Esta tecnología es similar a la que usan plataformas como Freepik internamente para indexar millones de recursos digitales.
 
 ## 🌐 API REST
 
