@@ -27,11 +27,11 @@ Plataforma web de gestión de activos digitales desarrollada con Laravel 10, con
 
 ### ✨ Gemini Vision — Análisis visual real de imágenes
 
-![Gemini Vision Detail](screenshots/07-gemini-vision-detail.jpg)
+<img src="screenshots/07-gemini-vision-detail.jpg" width="800" alt="Gemini Vision Detail"/>
 
 ### ✨ Gemini Vision — Otro ejemplo
 
-![Gemini Vision Example](screenshots/09-gemini-vision-example2.jpg)
+<img src="screenshots/09-gemini-vision-example2.jpg" width="800" alt="Gemini Vision Example"/>
 
 ### Vista detalle con metadatos generados por IA
 
