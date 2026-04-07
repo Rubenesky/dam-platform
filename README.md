@@ -164,6 +164,22 @@ Si alguien sube el mismo archivo exacto, se detecta al 100% por su hash MD5 sin 
 **Nivel 2 — IA semántica (Gemini):**
 Si el archivo es diferente pero el contenido es similar (> 70%), Gemini lo detecta comparando descripciones y tags. El archivo se sube pero se avisa al usuario.
 
+### 4. Gemini AI Variants — Generador de variantes y sugerencias
+
+Desde la vista de cualquier asset el usuario puede pedir a la IA que genere sugerencias de mejora de los metadatos:
+
+- **3 títulos alternativos** más SEO-friendly y descriptivos
+- **2 descripciones mejoradas** más atractivas y detalladas
+- **5 tags adicionales** relevantes no incluidos en los actuales
+
+Las sugerencias son interactivas — el usuario puede aplicar cualquiera con un clic sin necesidad de editar manualmente. Los tags se añaden directamente a los metadatos existentes.
+
+**Ejemplo real:**
+
+- Título actual: _"Valle alpino con río turquesa y montañas nevadas"_
+- Sugerencias: _"Valle Alpino: Río Turquesa y Picos Nevados"_, _"Paisaje Montañoso con Río Glaciar Turquesa"_
+- Tags adicionales sugeridos: `glaciar`, `picos nevados`, `coníferas`, `escénico`, `aire libre`
+
 ### Metadatos generados automáticamente
 
 - **Título** descriptivo (máximo 60 caracteres)
