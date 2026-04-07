@@ -156,9 +156,13 @@ El usuario escribe en lenguaje humano y la IA convierte la búsqueda en filtros 
 
 Endpoint: `POST /api/search` con `{"query": "tu búsqueda en lenguaje natural"}`
 
-### 3. Gemini Duplicate Detection — Detección de duplicados
+### 3. Sistema de detección de duplicados — Dos niveles
 
-Al subir un asset, la IA compara su descripción y tags con todos los assets existentes. Si detecta similitud superior al 70% avisa al usuario con el porcentaje de similitud y el motivo.
+**Nivel 1 — Hash MD5 (instantáneo):**
+Si alguien sube el mismo archivo exacto, se detecta al 100% por su hash MD5 sin gastar ninguna petición a la IA. El archivo se rechaza automáticamente.
+
+**Nivel 2 — IA semántica (Gemini):**
+Si el archivo es diferente pero el contenido es similar (> 70%), Gemini lo detecta comparando descripciones y tags. El archivo se sube pero se avisa al usuario.
 
 ### Metadatos generados automáticamente
 
