@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Asset;
 use App\Models\AssetMetadata;
+use App\Services\AIVariantsService;
 use App\Services\DuplicateDetectionService;
 use App\Services\GeminiService;
 use App\Traits\LogsActivity;
@@ -163,6 +164,36 @@ class AssetApiController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Asset eliminado correctamente.',
+        ]);
+    }
+
+    // POST /api/assets/{id}/variants
+    public function variants(Asset $asset): JsonResponse
+    {
+        if (!$asset->metadata) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Este asset no tiene metadatos generados todavía.',
+            ], 422);
+        }
+
+        $variantsService = new AIVariantsService();
+        $variants        = $variantsService->generateVariants(
+            $asset->metadata->title ?? '',
+            $asset->metadata->description ?? '',
+            $asset->metadata->tags ?? []
+        );
+
+        if (empty($variants)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No se pudieron generar variantes. Inténtalo de nuevo.',
+            ], 503);
+        }
+
+        return response()->json([
+            'success'  => true,
+            'variants' => $variants,
         ]);
     }
 
