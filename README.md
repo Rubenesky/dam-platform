@@ -180,6 +180,21 @@ Las sugerencias son interactivas — el usuario puede aplicar cualquiera con un 
 - Sugerencias: _"Valle Alpino: Río Turquesa y Picos Nevados"_, _"Paisaje Montañoso con Río Glaciar Turquesa"_
 - Tags adicionales sugeridos: `glaciar`, `picos nevados`, `coníferas`, `escénico`, `aire libre`
 
+### 5. RAG — Chat con tu base de datos en lenguaje natural
+
+Tecnología utilizada por Google, Microsoft y OpenAI internamente. El usuario puede hacer preguntas en lenguaje natural sobre los datos reales de la plataforma y la IA responde consultando la base de datos.
+
+**Ejemplos reales:**
+
+- _"¿Cuántos assets tengo subidos?"_ → _"Tienes 10 assets subidos en la plataforma."_
+- _"¿Qué assets subí esta semana?"_ → _"Esta semana subiste: 'Kirkjufell y Kirkjufellsfoss...', 'Paisaje Alpino...'"_
+- _"¿Cuál es el usuario más activo?"_ → _"El usuario más activo es RuBeNesKy con 10 assets subidos."_
+- _"¿Cuánto espacio ocupan los assets?"_ → _"El espacio total ocupado es de 1.35 MB."_
+
+La IA no inventa datos — consulta la base de datos real en tiempo real y responde únicamente con información verificada.
+
+Endpoint: `POST /api/rag` con `{"question": "tu pregunta en lenguaje natural"}`
+
 ### Metadatos generados automáticamente
 
 - **Título** descriptivo (máximo 60 caracteres)
