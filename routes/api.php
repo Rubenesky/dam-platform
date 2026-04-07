@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AssetApiController;
 use App\Http\Controllers\Api\AuthApiController;
+use App\Http\Controllers\Api\RAGController;
 use App\Http\Controllers\Api\SearchApiController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -37,4 +38,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Búsqueda por lenguaje natural
     Route::post('/search', [SearchApiController::class, 'search']);
+
+    // RAG — Chat con la base de datos
+    Route::post('/rag', [RAGController::class, 'query']);
 });
