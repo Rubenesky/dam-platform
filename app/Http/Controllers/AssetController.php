@@ -5,8 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Asset;
 use App\Models\AssetMetadata;
 use App\Models\Category;
-use App\Services\GeminiService;
 use App\Services\DuplicateDetectionService;
+use App\Services\GeminiService;
 use App\Traits\LogsActivity;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -21,29 +21,25 @@ class AssetController extends Controller
     {
         $query = Asset::with(['user', 'metadata', 'categories']);
 
-        // Búsqueda por nombre
         if ($request->filled('search')) {
             $query->where('original_name', 'like', '%' . $request->search . '%');
         }
 
-        // Filtro por tipo
         if ($request->filled('type')) {
             $query->where('mime_type', 'like', $request->type . '%');
         }
 
-        // Filtro por estado
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
 
-        // Filtro por categoría
         if ($request->filled('category')) {
             $query->whereHas('categories', function ($q) use ($request) {
                 $q->where('categories.id', $request->category);
             });
         }
 
-        $assets = $query->latest()->paginate(12)->withQueryString();
+        $assets     = $query->latest()->paginate(12)->withQueryString();
         $categories = Category::whereNull('parent_id')->with('children')->get();
 
         return view('assets.index', compact('assets', 'categories'));
@@ -60,14 +56,24 @@ class AssetController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'file' => ['required', 'file', 'max:10240'],
-            'categories' => ['nullable', 'array'],
+            'file'         => ['required', 'file', 'max:10240'],
+            'categories'   => ['nullable', 'array'],
             'categories.*' => ['exists:categories,id'],
         ]);
 
         $file = $request->file('file');
+
+        // Detección de duplicado exacto por hash
+        $fileHash      = md5_file($file->getRealPath());
+        $existingAsset = Asset::where('file_hash', $fileHash)->first();
+
+        if ($existingAsset) {
+            return redirect()->route('assets.show', $existingAsset)
+                             ->with('warning', '⚠️ Este archivo ya existe en la plataforma. Te redirigimos al asset existente.');
+        }
+
         $filename = Str::uuid() . '.' . $file->getClientOriginalExtension();
-        $path = $file->storeAs('assets', $filename, 'public');
+        $path     = $file->storeAs('assets', $filename, 'public');
 
         $asset = Asset::create([
             'user_id'       => auth()->id(),
@@ -76,6 +82,7 @@ class AssetController extends Controller
             'mime_type'     => $file->getMimeType(),
             'size'          => $file->getSize(),
             'path'          => $path,
+            'file_hash'     => $fileHash,
             'status'        => 'pending',
         ]);
 
@@ -83,7 +90,6 @@ class AssetController extends Controller
             $asset->categories()->sync($request->categories);
         }
 
-        // Llamada a Gemini para generar metadatos
         $gemini   = new GeminiService();
         $metadata = $gemini->generateAssetMetadata(
             $file->getClientOriginalName(),
@@ -102,9 +108,9 @@ class AssetController extends Controller
         $asset->update(['status' => 'processed']);
         $this->logActivity('upload', $asset, ['filename' => $asset->original_name]);
 
-        // Detección de duplicados
+        // Detección de duplicados semánticos con IA
         $duplicateDetector = new DuplicateDetectionService();
-        $similarAssets = $duplicateDetector->findSimilar(
+        $similarAssets     = $duplicateDetector->findSimilar(
             $asset->id,
             $metadata['description'] ?? '',
             $metadata['tags'] ?? []
@@ -113,11 +119,11 @@ class AssetController extends Controller
         if (!empty($similarAssets)) {
             $similarIds = collect($similarAssets)->pluck('id')->join(', #');
             return redirect()->route('assets.show', $asset)
-                            ->with('warning', "Asset subido. ⚠️ Se detectaron assets similares: #{$similarIds}");
+                             ->with('warning', "Asset subido. ⚠️ Se detectaron assets similares: #{$similarIds}");
         }
 
         return redirect()->route('assets.show', $asset)
-                        ->with('success', 'Asset subido y metadatos generados por IA.');
+                         ->with('success', 'Asset subido y metadatos generados por IA.');
     }
 
     // Ver un asset individual
@@ -138,7 +144,7 @@ class AssetController extends Controller
     public function update(Request $request, Asset $asset)
     {
         $request->validate([
-            'categories' => ['nullable', 'array'],
+            'categories'   => ['nullable', 'array'],
             'categories.*' => ['exists:categories,id'],
         ]);
 
@@ -166,9 +172,7 @@ class AssetController extends Controller
     public function destroy(Asset $asset)
     {
         Storage::disk('public')->delete($asset->path);
-
         $this->logActivity('delete', null, ['filename' => $asset->original_name]);
-
         $asset->delete();
 
         return redirect()->route('assets.index')

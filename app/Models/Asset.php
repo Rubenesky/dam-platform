@@ -19,6 +19,7 @@ class Asset extends Model
         'mime_type',
         'size',
         'path',
+        'file_hash',
         'status',
     ];
 

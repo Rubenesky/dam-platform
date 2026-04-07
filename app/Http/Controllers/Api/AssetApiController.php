@@ -45,7 +45,21 @@ class AssetApiController extends Controller
             'file' => ['required', 'file', 'max:10240'],
         ]);
 
-        $file     = $request->file('file');
+        $file = $request->file('file');
+
+        // Detección de duplicado exacto por hash
+        $fileHash      = md5_file($file->getRealPath());
+        $existingAsset = Asset::where('file_hash', $fileHash)->first();
+
+        if ($existingAsset) {
+            $existingAsset->load(['user', 'metadata', 'categories']);
+            return response()->json([
+                'success'        => false,
+                'message'        => 'Este archivo ya existe en la plataforma.',
+                'existing_asset' => $this->formatAsset($existingAsset),
+            ], 409);
+        }
+
         $filename = Str::uuid() . '.' . $file->getClientOriginalExtension();
         $path     = $file->storeAs('assets', $filename, 'public');
 
@@ -56,6 +70,7 @@ class AssetApiController extends Controller
             'mime_type'     => $file->getMimeType(),
             'size'          => $file->getSize(),
             'path'          => $path,
+            'file_hash'     => $fileHash,
             'status'        => 'pending',
         ]);
 
@@ -77,7 +92,7 @@ class AssetApiController extends Controller
         $asset->update(['status' => 'processed']);
         $this->logActivity('upload', $asset, ['filename' => $asset->original_name]);
 
-        // Detección de duplicados
+        // Detección de duplicados semánticos con IA
         $duplicateDetector = new DuplicateDetectionService();
         $similarAssets     = $duplicateDetector->findSimilar(
             $asset->id,
