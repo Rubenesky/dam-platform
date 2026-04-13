@@ -4,7 +4,9 @@ Plataforma web de gestión de activos digitales desarrollada con Laravel 10, con
 
 ## 🌐 Demo en producción
 
-**URL:** https://dam-platform.onrender.com
+**Backend:** https://dam-platform.onrender.com
+
+**Frontend:** https://69dd308a7b42221f2ffba6b8--reliable-souffle-05bb52.netlify.app
 
 > ⚠️ El servidor puede tardar 30-50 segundos en arrancar la primera vez por ser el plan gratuito de Render.
 
