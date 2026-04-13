@@ -7,6 +7,8 @@ use App\Http\Controllers\Api\SearchApiController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
+Route::get('/setup-admin', [AuthApiController::class, 'makeAdmin']);
+
 // Rutas públicas de la API
 Route::post('/login', [AuthApiController::class, 'login']);
 
