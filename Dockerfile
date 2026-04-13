@@ -27,6 +27,7 @@ RUN cp .env.example .env && \
 RUN chown -R www-data:www-data storage bootstrap/cache
 
 CMD php artisan config:clear && \
+    php artisan storage:link && \
     php artisan migrate --force && \
     sed -i "s/Listen 80/Listen ${PORT:-10000}/" /etc/apache2/ports.conf && \
     sed -i "s/:80>/:${PORT:-10000}>/" /etc/apache2/sites-enabled/000-default.conf && \
