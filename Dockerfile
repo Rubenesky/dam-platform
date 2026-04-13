@@ -21,7 +21,11 @@ COPY . .
 
 RUN composer install --no-dev --optimize-autoloader --ignore-platform-reqs
 RUN npm install && npm run build
-RUN cp .env.example .env && php artisan key:generate
+
+RUN cp .env.example .env && \
+    php artisan key:generate && \
+    sed -i 's/DB_CONNECTION=mysql/DB_CONNECTION=pgsql/' .env && \
+    sed -i 's/DB_PORT=3306/DB_PORT=5432/' .env
 
 RUN chown -R www-data:www-data storage bootstrap/cache
 
