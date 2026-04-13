@@ -57,6 +57,12 @@ Plataforma web de gestión de activos digitales desarrollada con Laravel 10, con
 
 ![Excel Export](screenshots/14-excel-export.jpg)
 
+### 🤖 RAG — Chat con la base de datos
+
+![RAG Inicio](screenshots/15-rag-inicio.jpg)
+
+![RAG Conversación](screenshots/16-rag-conversacion.jpg)
+
 ## 🛠️ Stack tecnológico
 
 | Capa                 | Tecnología                       |
