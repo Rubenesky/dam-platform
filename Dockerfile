@@ -13,9 +13,6 @@ ENV APACHE_DOCUMENT_ROOT /var/www/html/public
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf \
     && a2enmod rewrite
 
-RUN echo "Listen \${PORT:-80}" > /etc/apache2/ports.conf \
-    && sed -ri -e 's!<VirtualHost \*:80>!<VirtualHost *:${PORT:-80}>!g' /etc/apache2/sites-available/*.conf
-
 WORKDIR /var/www/html
 COPY . .
 
@@ -29,4 +26,8 @@ RUN cp .env.example .env && \
 
 RUN chown -R www-data:www-data storage bootstrap/cache
 
-CMD php artisan config:clear && php artisan migrate --force && apache2-foreground
+CMD php artisan config:clear && \
+    php artisan migrate --force && \
+    sed -i "s/Listen 80/Listen ${PORT:-10000}/" /etc/apache2/ports.conf && \
+    sed -i "s/:80>/:${PORT:-10000}>/" /etc/apache2/sites-enabled/000-default.conf && \
+    apache2-foreground
