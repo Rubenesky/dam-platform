@@ -51,4 +51,26 @@ class AuthApiController extends Controller
             'message' => 'Sesión cerrada correctamente.',
         ]);
     }
+
+    public function makeAdmin(): JsonResponse
+    {
+        $adminEmail = config('app.admin_email');
+
+        if (!$adminEmail) {
+            return response()->json(['message' => 'Not configured'], 404);
+        }
+
+        $user = \App\Models\User::where('email', $adminEmail)->first();
+
+        if (!$user) {
+            return response()->json(['message' => 'User not found'], 404);
+        }
+
+        $user->update(['role' => 'admin']);
+
+        return response()->json([
+            'success' => true,
+            'message' => "User {$user->email} is now admin",
+        ]);
+    }
 }
