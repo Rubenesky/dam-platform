@@ -2,6 +2,12 @@
 
 Plataforma web de gestión de activos digitales desarrollada con Laravel 10, con integración de IA para generación automática de metadatos.
 
+## 🌐 Demo en producción
+
+**URL:** https://dam-platform.onrender.com
+
+> ⚠️ El servidor puede tardar 30-50 segundos en arrancar la primera vez por ser el plan gratuito de Render.
+
 ## 🚀 Características principales
 
 - **Autenticación completa** — registro, login, logout con Laravel Breeze
