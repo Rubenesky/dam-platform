@@ -23,6 +23,7 @@ return [
     'http://localhost:5173',
     'http://localhost:5174',
     'https://69dd308a7b42221f2ffba6b8--reliable-souffle-05bb52.netlify.app',
+    'https://dam-platform-ai.netlify.app',
     ],
 
     'allowed_origins_patterns' => [],
