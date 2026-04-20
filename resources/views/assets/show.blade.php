@@ -44,9 +44,9 @@
             {{-- Previsualización --}}
             <div class="bg-white dark:bg-gray-800 shadow rounded-xl p-6">
                 @if(str_starts_with($asset->mime_type, 'image/'))
-                <img src="{{ Storage::url($asset->path) }}"
-                     alt="{{ $asset->original_name }}"
-                     class="max-h-96 mx-auto rounded-lg">
+                <img src="{{ $asset->cloudinary_url ?? Storage::url($asset->path) }}"
+                    alt="{{ $asset->original_name }}"
+                    class="max-h-96 mx-auto rounded-lg">
                 @else
                 <div class="flex items-center justify-center h-40 bg-gray-100 dark:bg-gray-700 rounded-lg">
                     <span class="text-6xl">📄</span>

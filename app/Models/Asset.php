@@ -20,6 +20,8 @@ class Asset extends Model
         'size',
         'path',
         'file_hash',
+        'cloudinary_public_id',
+        'cloudinary_url',
         'status',
     ];
 

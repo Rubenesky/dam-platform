@@ -9,10 +9,12 @@ use App\Services\AIVariantsService;
 use App\Services\DuplicateDetectionService;
 use App\Services\GeminiService;
 use App\Traits\LogsActivity;
+use App\Services\CloudinaryService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+
 
 class AssetApiController extends Controller
 {
@@ -61,18 +63,24 @@ class AssetApiController extends Controller
             ], 409);
         }
 
+        // Subir a Cloudinary
+        $cloudinary       = new CloudinaryService();
+        $cloudinaryResult = $cloudinary->upload($file);
+
         $filename = Str::uuid() . '.' . $file->getClientOriginalExtension();
         $path     = $file->storeAs('assets', $filename, 'public');
 
         $asset = Asset::create([
-            'user_id'       => auth()->id(),
-            'original_name' => $file->getClientOriginalName(),
-            'filename'      => $filename,
-            'mime_type'     => $file->getMimeType(),
-            'size'          => $file->getSize(),
-            'path'          => $path,
-            'file_hash'     => $fileHash,
-            'status'        => 'pending',
+            'user_id'              => auth()->id(),
+            'original_name'        => $file->getClientOriginalName(),
+            'filename'             => $filename,
+            'mime_type'            => $file->getMimeType(),
+            'size'                 => $file->getSize(),
+            'path'                 => $path,
+            'file_hash'            => $fileHash,
+            'cloudinary_public_id' => $cloudinaryResult['public_id'],
+            'cloudinary_url'       => $cloudinaryResult['url'],
+            'status'               => 'pending',
         ]);
 
         $gemini   = new GeminiService();
@@ -206,7 +214,7 @@ class AssetApiController extends Controller
             'mime_type'     => $asset->mime_type,
             'size_kb'       => round($asset->size / 1024, 2),
             'status'        => $asset->status,
-            'url'           => asset('storage/' . $asset->path),
+            'url' => $asset->cloudinary_url ?? asset('storage/' . $asset->path),
             'uploaded_by'   => $asset->user->name,
             'metadata'      => $asset->metadata ? [
                 'title'        => $asset->metadata->title,

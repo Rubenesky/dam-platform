@@ -124,7 +124,7 @@
                    class="bg-white dark:bg-gray-800 rounded-xl shadow hover:shadow-lg transition p-4 block">
 
                     @if(str_starts_with($asset->mime_type, 'image/'))
-                    <img src="{{ Storage::url($asset->path) }}"
+                    <img src="{{ $asset->cloudinary_url ?? Storage::url($asset->path) }}"
                          alt="{{ $asset->original_name }}"
                          class="w-full h-40 object-cover rounded-lg mb-3">
                     @else
