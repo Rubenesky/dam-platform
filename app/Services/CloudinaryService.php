@@ -12,11 +12,15 @@ class CloudinaryService
 
     public function __construct()
     {
+        $cloudName = env('CLOUDINARY_CLOUD_NAME', config('cloudinary.cloud_name'));
+        $apiKey    = env('CLOUDINARY_API_KEY', config('cloudinary.api_key'));
+        $apiSecret = env('CLOUDINARY_API_SECRET', config('cloudinary.api_secret'));
+
         Configuration::instance([
             'cloud' => [
-                'cloud_name' => config('cloudinary.cloud_name'),
-                'api_key'    => config('cloudinary.api_key'),
-                'api_secret' => config('cloudinary.api_secret'),
+                'cloud_name' => $cloudName,
+                'api_key'    => $apiKey,
+                'api_secret' => $apiSecret,
             ],
             'url' => [
                 'secure' => true
