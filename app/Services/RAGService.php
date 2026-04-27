@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Asset;
 use App\Models\ActivityLog;
 use App\Models\User;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -22,7 +23,7 @@ class RAGService
     public function query(string $userQuestion): string
     {
         // Paso 1: Recopilamos contexto real de la base de datos
-        $context = $this->gatherContext();
+        $context = Cache::remember('rag_context', 300, fn() => $this->gatherContext());
 
         // Paso 2: Mandamos el contexto + pregunta a Gemini
         $prompt = "Eres un asistente inteligente de la plataforma DAM Platform, un sistema de gestión de activos digitales.
