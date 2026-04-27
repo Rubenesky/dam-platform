@@ -30,6 +30,8 @@ class DuplicateDetectionService
             ->whereHas('metadata', function ($q) {
                 $q->whereNotNull('description');
             })
+            ->latest()
+            ->limit(200)
             ->get();
 
         if ($existingAssets->isEmpty()) {
