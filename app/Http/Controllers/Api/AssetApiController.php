@@ -45,7 +45,12 @@ class AssetApiController extends Controller
     public function store(Request $request): JsonResponse
     {
         $request->validate([
-            'file' => ['required', 'file', 'max:10240'],
+            'file' => [
+                'required',
+                'file',
+                'max:10240',
+                'mimes:jpg,jpeg,png,gif,webp,svg,pdf,mp4,mov,avi,mp3,wav',
+            ],
         ]);
 
         $file = $request->file('file');
@@ -133,8 +138,8 @@ class AssetApiController extends Controller
     {
         $request->validate([
             'title'       => ['nullable', 'string', 'max:255'],
-            'description' => ['nullable', 'string'],
-            'tags'        => ['nullable', 'string'],
+            'description' => ['nullable', 'string', 'max:5000'],
+            'tags'        => ['nullable', 'string', 'max:1000'],
         ]);
 
         $asset->metadata()->updateOrCreate(
@@ -214,7 +219,9 @@ class AssetApiController extends Controller
             'mime_type'     => $asset->mime_type,
             'size_kb'       => round($asset->size / 1024, 2),
             'status'        => $asset->status,
-            'url' => $asset->cloudinary_url ?? asset('storage/' . $asset->path),
+            'url' => str_starts_with($asset->path, 'http')
+                    ? $asset->path
+                    : asset('storage/' . $asset->path),
             'uploaded_by'   => $asset->user->name,
             'metadata'      => $asset->metadata ? [
                 'title'        => $asset->metadata->title,
