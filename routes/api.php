@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 // Rutas públicas de la API
-Route::post('/login', [AuthApiController::class, 'login']);
+Route::post('/login', [AuthApiController::class, 'login'])->middleware('throttle:5,1');
 
 // Rutas protegidas por token
 Route::middleware('auth:sanctum')->group(function () {
@@ -30,7 +30,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Assets API
     Route::get('/assets', [AssetApiController::class, 'index']);
-    Route::post('/assets', [AssetApiController::class, 'store']);
+    Route::post('/assets', [AssetApiController::class, 'store'])->middleware('throttle:10,1');
     Route::get('/assets/{asset}', [AssetApiController::class, 'show']);
     Route::patch('/assets/{asset}', [AssetApiController::class, 'update']);
     Route::delete('/assets/{asset}', [AssetApiController::class, 'destroy']);
