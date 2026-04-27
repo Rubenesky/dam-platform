@@ -34,11 +34,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/assets/{asset}', [AssetApiController::class, 'show']);
     Route::patch('/assets/{asset}', [AssetApiController::class, 'update']);
     Route::delete('/assets/{asset}', [AssetApiController::class, 'destroy']);
-    Route::post('/assets/{asset}/variants', [AssetApiController::class, 'variants']);
+    Route::post('/assets/{asset}/variants', [AssetApiController::class, 'variants'])->middleware('throttle:10,1');
 
     // Búsqueda por lenguaje natural
-    Route::post('/search', [SearchApiController::class, 'search']);
+    Route::post('/search', [SearchApiController::class, 'search'])->middleware('throttle:20,1');
 
     // RAG — Chat con la base de datos
-    Route::post('/rag', [RAGController::class, 'query']);
+    Route::post('/rag', [RAGController::class, 'query'])->middleware('throttle:10,1');
 });
