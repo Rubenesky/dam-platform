@@ -28,7 +28,7 @@ class AuthApiController extends Controller
 
         // Borramos tokens anteriores y creamos uno nuevo
         $user->tokens()->delete();
-        $token = $user->createToken('api-token')->plainTextToken;
+        $token = $user->createToken('api-token', ['*'], now()->addDays(7))->plainTextToken;
 
         return response()->json([
             'success' => true,
