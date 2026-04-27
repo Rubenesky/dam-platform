@@ -49,7 +49,7 @@ class AssetApiController extends Controller
                 'required',
                 'file',
                 'max:10240',
-                'mimes:jpg,jpeg,png,gif,webp,svg,pdf,mp4,mov,avi,mp3,wav',
+                'mimes:jpg,jpeg,png,gif,webp,pdf,mp4,mov,avi,mp3,wav',
             ],
         ]);
 
