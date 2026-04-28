@@ -69,7 +69,7 @@ class AssetApiController extends Controller
         }
 
         // Subir a Cloudinary
-        $cloudinary       = new CloudinaryService();
+        $cloudinary       = app(CloudinaryService::class);
         $cloudinaryResult = $cloudinary->upload($file);
 
         $filename = Str::uuid() . '.' . $file->getClientOriginalExtension();
@@ -88,7 +88,7 @@ class AssetApiController extends Controller
             'status'               => 'pending',
         ]);
 
-        $gemini   = new GeminiService();
+        $gemini   = app(GeminiService::class);
         $metadata = $gemini->generateAssetMetadata(
             $file->getClientOriginalName(),
             $file->getMimeType(),
@@ -107,7 +107,7 @@ class AssetApiController extends Controller
         $this->logActivity('upload', $asset, ['filename' => $asset->original_name]);
 
         // Detección de duplicados semánticos con IA
-        $duplicateDetector = new DuplicateDetectionService();
+        $duplicateDetector = app(DuplicateDetectionService::class);
         $similarAssets     = $duplicateDetector->findSimilar(
             $asset->id,
             $metadata['description'] ?? '',
