@@ -136,6 +136,10 @@ class AssetApiController extends Controller
     // PATCH /api/assets/{id}
     public function update(Request $request, Asset $asset): JsonResponse
     {
+        if (auth()->user()->role === 'viewer') {
+            return response()->json(['success' => false, 'message' => 'Sin permiso.'], 403);
+        }
+
         $request->validate([
             'title'       => ['nullable', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:5000'],
