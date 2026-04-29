@@ -19,9 +19,6 @@ jobs:
           php-version: '8.2'
           extensions: pdo, pdo_sqlite, sqlite3
 
-      - name: Check PHP extensions
-        run: php -m | grep -E "sqlite|pdo"
-
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist
 
