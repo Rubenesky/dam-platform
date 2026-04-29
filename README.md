@@ -1,5 +1,7 @@
 # DAM Platform — Digital Asset Management
 
+![Tests](https://github.com/Rubenesky/dam-platform/actions/workflows/tests.yml/badge.svg)
+
 Plataforma web de gestión de activos digitales desarrollada con Laravel 10, con integración de IA para generación automática de metadatos.
 
 ## 🌐 Demo en producción
