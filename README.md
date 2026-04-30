@@ -63,10 +63,6 @@ Plataforma web de gestión de activos digitales desarrollada con Laravel 10, con
 
 ![API Postman](screenshots/12-api-postman.jpg)
 
-### Exportación a Excel
-
-![Excel Export](screenshots/14-excel-export.jpg)
-
 ### 🤖 RAG — Chat con la base de datos
 
 ![RAG Inicio](screenshots/15-rag-inicio.jpg)
@@ -77,13 +73,14 @@ Plataforma web de gestión de activos digitales desarrollada con Laravel 10, con
 
 | Capa                 | Tecnología                       |
 | -------------------- | -------------------------------- |
-| Backend              | Laravel 10 (PHP 8.1)             |
-| Frontend             | Blade + Alpine.js + Tailwind CSS |
+| Backend              | Laravel 10 (PHP 8.2)             |
 | Base de datos        | MySQL                            |
 | Autenticación API    | Laravel Sanctum                  |
 | IA                   | Google Gemini API                |
-| Gráficos             | Chart.js                         |
-| Tests                | PHPUnit                          |
+| Almacenamiento       | Cloudinary                       |
+| Tests                | Pest 2.x + PHPUnit               |
+| CI/CD                | GitHub Actions                   |
+| Frontend             | Vue 3 (repo separado)            |
 | Control de versiones | Git + GitHub                     |
 
 ## ⚙️ Instalación local
@@ -305,13 +302,38 @@ Respuesta:
 
 ## 🧪 Tests
 
+Suite de 27 tests automatizados con CI/CD en GitHub Actions.
+
 ```bash
 # Ejecutar todos los tests
-php artisan test
+php artisan test tests/Feature/Auth tests/Feature/Authorization tests/Feature/Assets
 
-# Ejecutar solo los tests de assets
-php artisan test --filter AssetTest
+# Tests de autenticación
+php artisan test tests/Feature/Auth/AuthTest.php
+
+# Tests de permisos por rol
+php artisan test tests/Feature/Authorization/RolePermissionsTest.php
+
+# Tests de assets
+php artisan test tests/Feature/Assets/
 ```
+
+Los tests cubren:
+- Autenticación: login, logout, rate limiting (429 tras 5 intentos), token invalidation
+- Permisos: admin/editor/viewer con sus restricciones reales
+- Upload: validación de tipos, límite de tamaño, detección de duplicados por hash
+- CRUD: paginación, estructura de respuesta, edición de metadatos
+
+## 🔒 Seguridad
+
+El proyecto pasó una auditoría de seguridad completa. Vulnerabilidades corregidas:
+
+- Variables de entorno para URL y credenciales (no hardcodeadas en el código)
+- Rate limiting en login (5 intentos/min) y endpoints de IA
+- Tokens Sanctum con expiración de 7 días
+- Whitelist de tipos de archivo — imágenes, PDF, vídeo, audio
+- SVG eliminado (vector de XSS)
+- CORS restringido a métodos y headers necesarios
 
 ## 📁 Estructura del proyecto
 
@@ -319,31 +341,37 @@ php artisan test --filter AssetTest
 app/
 ├── Http/
 │   ├── Controllers/
+│   │   ├── Api/
+│   │   │   ├── AssetApiController.php
+│   │   │   ├── AuthApiController.php
+│   │   │   ├── RAGController.php
+│   │   │   └── SearchApiController.php
 │   │   ├── Admin/UserController.php
-│   │   ├── Api/AssetApiController.php
-│   │   ├── Api/AuthApiController.php
-│   │   ├── AssetController.php
-│   │   ├── CategoryController.php
 │   │   └── DashboardController.php
 │   └── Middleware/
 │       └── CheckRole.php
 ├── Models/
-│   ├── ActivityLog.php
 │   ├── Asset.php
 │   ├── AssetMetadata.php
 │   ├── Category.php
+│   ├── ActivityLog.php
 │   └── User.php
 ├── Services/
-│   └── GeminiService.php
+│   ├── GeminiService.php
+│   ├── CloudinaryService.php
+│   ├── RAGService.php
+│   ├── NaturalLanguageSearchService.php
+│   ├── DuplicateDetectionService.php
+│   └── AIVariantsService.php
 └── Traits/
     └── LogsActivity.php
-database/
-└── migrations/
-    ├── create_assets_table.php
-    ├── create_asset_metadata_table.php
-    ├── create_categories_table.php
-    ├── create_asset_category_table.php
-    └── create_activity_log_table.php
+tests/
+├── Feature/
+│   ├── Auth/AuthTest.php
+│   ├── Authorization/RolePermissionsTest.php
+│   └── Assets/
+│       ├── AssetUploadTest.php
+│       └── AssetCrudTest.php
 ```
 
 ## 👨‍💻 Autor
