@@ -223,9 +223,10 @@ class AssetApiController extends Controller
             'mime_type'     => $asset->mime_type,
             'size_kb'       => round($asset->size / 1024, 2),
             'status'        => $asset->status,
-            'url' => str_starts_with($asset->path, 'http')
-                    ? $asset->path
-                    : asset('storage/' . $asset->path),
+            'url' => $asset->cloudinary_url
+                    ?: (str_starts_with($asset->path, 'http')
+                        ? $asset->path
+                        : asset('storage/' . $asset->path)),
             'uploaded_by'   => $asset->user->name,
             'metadata'      => $asset->metadata ? [
                 'title'        => $asset->metadata->title,
