@@ -7,16 +7,6 @@ use App\Http\Controllers\Api\SearchApiController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/debug-gemini', function () {
-    $apiKey = config('services.gemini.key') ?? env('GEMINI_API_KEY');
-    $apiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
-    if (!$apiKey) return response()->json(['error' => 'KEY NULL']);
-    $response = \Illuminate\Support\Facades\Http::post("{$apiUrl}?key={$apiKey}", [
-        'contents' => [['parts' => [['text' => 'Di hola']]]]
-    ]);
-    return response()->json(['prefix' => substr($apiKey, 0, 8), 'status' => $response->status(), 'body' => $response->json()]);
-});
-
 // Rutas públicas de la API
 Route::post('/login', [AuthApiController::class, 'login'])->middleware('throttle:5,1');
 
