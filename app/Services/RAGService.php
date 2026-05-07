@@ -17,7 +17,7 @@ class RAGService
     public function __construct()
     {
         $this->apiKey = config('services.gemini.key');
-        $this->apiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
+        $this->apiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
     }
 
     public function query(string $userQuestion): string
