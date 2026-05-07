@@ -92,7 +92,8 @@ class AssetApiController extends Controller
         $metadata = $gemini->generateAssetMetadata(
             $file->getClientOriginalName(),
             $file->getMimeType(),
-            $path
+            $path,
+            $cloudinaryResult['url'] ?? null
         );
 
         AssetMetadata::create([

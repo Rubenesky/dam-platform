@@ -17,15 +17,60 @@ class GeminiService
         $this->apiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
     }
 
-    public function generateAssetMetadata(string $filename, string $mimeType, ?string $storagePath = null): array
+    public function generateAssetMetadata(string $filename, string $mimeType, ?string $storagePath = null, ?string $cloudinaryUrl = null): array
     {
-        // Si es imagen y tenemos la ruta, usamos Vision
-        if (str_starts_with($mimeType, 'image/') && $storagePath) {
-            return $this->analyzeImageWithVision($filename, $mimeType, $storagePath);
+        // Si es imagen, usamos Vision con la URL de Cloudinary o storage local
+        if (str_starts_with($mimeType, 'image/')) {
+            if ($cloudinaryUrl) {
+                return $this->analyzeImageFromUrl($filename, $mimeType, $cloudinaryUrl);
+            }
+            if ($storagePath) {
+                return $this->analyzeImageWithVision($filename, $mimeType, $storagePath);
+            }
         }
-
-        // Para otros archivos usamos solo texto
         return $this->analyzeByFilename($filename, $mimeType);
+    }
+
+    private function analyzeImageFromUrl(string $filename, string $mimeType, string $imageUrl): array
+    {
+        try {
+            $imageData = Http::get($imageUrl)->body();
+            $base64    = base64_encode($imageData);
+
+            $prompt = "Analiza esta imagen y genera metadatos en formato JSON con exactamente estas claves:
+        - title: título descriptivo corto en español (máximo 60 caracteres)
+        - description: descripción detallada de lo que ves en la imagen en español (máximo 200 caracteres)
+        - tags: array de 5 etiquetas relevantes en español basadas en el contenido visual
+        Responde SOLO con el JSON, sin explicaciones ni formato markdown.";
+
+            $response = Http::post("{$this->apiUrl}?key={$this->apiKey}", [
+                'contents' => [[
+                    'parts' => [
+                        ['inline_data' => ['mime_type' => $mimeType, 'data' => $base64]],
+                        ['text' => $prompt]
+                    ]
+                ]]
+            ]);
+
+            if ($response->failed()) {
+                Log::error('Gemini Vision URL error', ['response' => $response->body()]);
+                return $this->analyzeByFilename($filename, $mimeType);
+            }
+
+            $text  = $response->json('candidates.0.content.parts.0.text');
+            $clean = preg_replace('/```json|```/', '', $text);
+            $data  = json_decode(trim($clean), true);
+
+            if (!$data || !isset($data['title'])) {
+                return $this->analyzeByFilename($filename, $mimeType);
+            }
+
+            return $data;
+
+        } catch (\Exception $e) {
+            Log::error('Gemini Vision URL exception', ['error' => $e->getMessage()]);
+            return $this->analyzeByFilename($filename, $mimeType);
+        }
     }
 
     private function analyzeImageWithVision(string $filename, string $mimeType, string $storagePath): array
