@@ -2,7 +2,7 @@ services:
   - type: web
     name: dam-platform
     env: php
-    buildCommand: composer install --no-dev && php artisan config:cache && php artisan route:cache && php artisan migrate --force
+    buildCommand: composer install --no-dev && php artisan config:clear && php artisan route:cache && php artisan migrate --force
     startCommand: php artisan serve --host=0.0.0.0 --port=$PORT
     envVars:
       - key: APP_ENV
