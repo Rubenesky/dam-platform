@@ -69,6 +69,64 @@ Plataforma web de gestión de activos digitales desarrollada con Laravel 10, con
 
 ![RAG Conversación](screenshots/16-rag-conversacion.jpg)
 
+## 🏗️ Arquitectura
+
+### Sistema completo
+
+```mermaid
+graph TB
+    subgraph FE["🌐 Frontend — Netlify"]
+        VUE["Vue 3 SPA<br/>Pinia · Vue Router · Axios"]
+    end
+
+    subgraph BE["⚙️ Backend — Render"]
+        API["Laravel 10 API<br/>Sanctum · Rate limiting"]
+        WORKER["Queue Worker<br/>ProcessAssetAI Job"]
+    end
+
+    subgraph EXT["☁️ Servicios externos"]
+        CLOUDINARY["Cloudinary<br/>Almacenamiento de archivos"]
+        GEMINI["Google Gemini API<br/>Vision · NLP · RAG · Variants"]
+        SUPABASE["Supabase<br/>PostgreSQL"]
+    end
+
+    VUE -->|"REST API (HTTPS)"| API
+    API -->|"Upload archivo"| CLOUDINARY
+    CLOUDINARY -->|"URL pública"| API
+    API -->|"Dispatch job"| WORKER
+    WORKER -->|"Analizar imagen / NLP"| GEMINI
+    GEMINI -->|"Metadatos generados"| WORKER
+    WORKER -->|"Guardar metadatos"| SUPABASE
+    API -->|"Leer / escribir"| SUPABASE
+```
+
+### Flujo de upload asíncrono
+
+```mermaid
+sequenceDiagram
+    participant U as Usuario
+    participant F as Frontend
+    participant A as API Laravel
+    participant C as Cloudinary
+    participant Q as Queue Worker
+    participant G as Gemini IA
+
+    U->>F: Selecciona archivo
+    F->>A: POST /api/assets
+    A->>C: Sube archivo
+    C-->>A: cloudinary_url
+    A->>Q: Dispatch ProcessAssetAI
+    A-->>F: 201 {status: "pending"}
+    F->>F: Inicia polling cada 3s
+    Q->>G: Analiza imagen con Vision
+    G-->>Q: título, descripción, tags
+    Q->>A: Guarda AssetMetadata
+    Q->>A: status = "processed"
+    F->>A: GET /api/assets/{id}/status
+    A-->>F: {status: "processed", metadata: {...}}
+    F->>F: Redirige al detalle del asset
+```
+
 ## 🛠️ Stack tecnológico
 
 | Capa                 | Tecnología                       |
