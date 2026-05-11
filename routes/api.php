@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\AssetApiController;
 use App\Http\Controllers\Api\AuthApiController;
 use App\Http\Controllers\Api\RAGController;
 use App\Http\Controllers\Api\SearchApiController;
+use App\Models\Asset;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -32,6 +33,18 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/assets', [AssetApiController::class, 'index']);
     Route::post('/assets', [AssetApiController::class, 'store'])->middleware('throttle:10,1');
     Route::get('/assets/{asset}', [AssetApiController::class, 'show']);
+    Route::get('/assets/{asset}/status', function (Asset $asset) {
+        $asset->load('metadata');
+        return response()->json([
+            'status'   => $asset->status,
+            'metadata' => $asset->metadata ? [
+                'title'        => $asset->metadata->title,
+                'description'  => $asset->metadata->description,
+                'tags'         => $asset->metadata->tags,
+                'ai_generated' => $asset->metadata->ai_generated,
+            ] : null,
+        ]);
+    });
     Route::patch('/assets/{asset}', [AssetApiController::class, 'update']);
     Route::delete('/assets/{asset}', [AssetApiController::class, 'destroy']);
     Route::post('/assets/{asset}/variants', [AssetApiController::class, 'variants'])->middleware('throttle:10,1');
