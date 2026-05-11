@@ -3,11 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\ProcessAssetAI;
 use App\Models\Asset;
-use App\Models\AssetMetadata;
 use App\Services\AIVariantsService;
-use App\Services\DuplicateDetectionService;
-use App\Services\GeminiService;
 use App\Traits\LogsActivity;
 use App\Services\CloudinaryService;
 use Illuminate\Http\JsonResponse;
@@ -88,38 +86,12 @@ class AssetApiController extends Controller
             'status'               => 'pending',
         ]);
 
-        $gemini   = app(GeminiService::class);
-        $metadata = $gemini->generateAssetMetadata(
-            $file->getClientOriginalName(),
-            $file->getMimeType(),
-            $path,
-            $cloudinaryResult['url'] ?? null
-        );
-
-        AssetMetadata::create([
-            'asset_id'     => $asset->id,
-            'title'        => $metadata['title'],
-            'description'  => $metadata['description'],
-            'tags'         => $metadata['tags'],
-            'ai_generated' => true,
-        ]);
-
-        $asset->update(['status' => 'processed']);
+        ProcessAssetAI::dispatch($asset->id);
         $this->logActivity('upload', $asset, ['filename' => $asset->original_name]);
 
-        // Detección de duplicados semánticos con IA
-        $duplicateDetector = app(DuplicateDetectionService::class);
-        $similarAssets     = $duplicateDetector->findSimilar(
-            $asset->id,
-            $metadata['description'] ?? '',
-            $metadata['tags'] ?? []
-        );
-
         return response()->json([
-            'success'        => true,
-            'data'           => $this->formatAsset($asset->fresh(['user', 'metadata', 'categories'])),
-            'similar_assets' => $similarAssets,
-            'has_duplicates' => !empty($similarAssets),
+            'success' => true,
+            'data'    => $this->formatAsset($asset->fresh(['user', 'metadata', 'categories'])),
         ], 201);
     }
 
