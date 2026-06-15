@@ -1,0 +1,24 @@
+FROM php:8.1-fpm-alpine
+
+RUN apk add --no-cache \
+    git curl libpng-dev libxml2-dev oniguruma-dev zip unzip \
+    postgresql-dev libzip-dev libwebp-dev libjpeg-turbo-dev freetype-dev \
+    autoconf g++ make linux-headers \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
+    && docker-php-ext-install pdo pdo_pgsql pgsql mbstring gd zip bcmath exif pcntl \
+    && pecl install redis \
+    && docker-php-ext-enable redis \
+    && apk del autoconf g++ make linux-headers
+
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+WORKDIR /var/www/html
+
+COPY composer.json composer.lock ./
+RUN composer install --no-dev --no-scripts --no-autoloader
+
+COPY . .
+
+RUN mkdir -p bootstrap/cache && chown -R www-data:www-data bootstrap/cache storage
+
+RUN composer dump-autoload --optimize

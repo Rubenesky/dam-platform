@@ -1,0 +1,86 @@
+networks:
+  dam_network:
+    driver: bridge
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: dam_platform
+      POSTGRES_USER: dam
+      POSTGRES_PASSWORD: ""
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - "127.0.0.1:5434:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - dam_network
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    depends_on:
+      - db
+    networks:
+      - dam_network
+    volumes:
+      - .:/var/www/html
+    env_file:
+      - .env.docker
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "8081:80"
+    depends_on:
+      - app
+    networks:
+      - dam_network
+    volumes:
+      - .:/var/www/html
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+
+  redis:
+    image: redis:7-alpine
+    networks:
+      - dam_network
+    volumes:
+      - redis_data:/data
+
+  metabase:
+    image: metabase/metabase:latest
+    ports:
+      - "3001:3000"
+    depends_on:
+      - db
+    networks:
+      - dam_network
+    environment:
+      MB_DB_TYPE: postgres
+      MB_DB_DBNAME: metabase
+      MB_DB_PORT: 5432
+      MB_DB_USER: dam
+      MB_DB_PASS: ""
+      MB_DB_HOST: db
+    volumes:
+      - metabase_data:/metabase-data
+
+  dbt:
+    image: ghcr.io/dbt-labs/dbt-postgres:1.8.latest
+    working_dir: /usr/app/dbt
+    volumes:
+      - ./dbt:/usr/app/dbt
+    depends_on:
+      - db
+    networks:
+      - dam_network
+    profiles: ["tools"]
+    command: ["run"]
+
+volumes:
+  postgres_data:
+  redis_data:
+  metabase_data:
