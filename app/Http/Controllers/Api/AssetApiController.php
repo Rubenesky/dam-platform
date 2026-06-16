@@ -6,13 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Jobs\ProcessAssetAI;
 use App\Models\Asset;
 use App\Services\AIVariantsService;
-use App\Traits\LogsActivity;
 use App\Services\CloudinaryService;
+use App\Traits\LogsActivity;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-
 
 class AssetApiController extends Controller
 {
@@ -22,20 +21,20 @@ class AssetApiController extends Controller
     public function index(): JsonResponse
     {
         $assets = Asset::with(['user', 'metadata', 'categories'])
-                       ->latest()
-                       ->paginate(15);
+            ->latest()
+            ->paginate(15);
 
         return response()->json([
             'success' => true,
-            'data'    => $assets->map(function ($asset) {
+            'data' => $assets->map(function ($asset) {
                 return $this->formatAsset($asset);
             }),
             'meta' => [
-                'total'        => $assets->total(),
-                'per_page'     => $assets->perPage(),
+                'total' => $assets->total(),
+                'per_page' => $assets->perPage(),
                 'current_page' => $assets->currentPage(),
-                'last_page'    => $assets->lastPage(),
-            ]
+                'last_page' => $assets->lastPage(),
+            ],
         ]);
     }
 
@@ -54,36 +53,37 @@ class AssetApiController extends Controller
         $file = $request->file('file');
 
         // Detección de duplicado exacto por hash
-        $fileHash      = md5_file($file->getRealPath());
+        $fileHash = md5_file($file->getRealPath());
         $existingAsset = Asset::where('file_hash', $fileHash)->first();
 
         if ($existingAsset) {
             $existingAsset->load(['user', 'metadata', 'categories']);
+
             return response()->json([
-                'success'        => false,
-                'message'        => 'Este archivo ya existe en la plataforma.',
+                'success' => false,
+                'message' => 'Este archivo ya existe en la plataforma.',
                 'existing_asset' => $this->formatAsset($existingAsset),
             ], 409);
         }
 
         // Subir a Cloudinary
-        $cloudinary       = app(CloudinaryService::class);
+        $cloudinary = app(CloudinaryService::class);
         $cloudinaryResult = $cloudinary->upload($file);
 
-        $filename = Str::uuid() . '.' . $file->getClientOriginalExtension();
-        $path     = $file->storeAs('assets', $filename, 'public');
+        $filename = Str::uuid().'.'.$file->getClientOriginalExtension();
+        $path = $file->storeAs('assets', $filename, 'public');
 
         $asset = Asset::create([
-            'user_id'              => auth()->id(),
-            'original_name'        => $file->getClientOriginalName(),
-            'filename'             => $filename,
-            'mime_type'            => $file->getMimeType(),
-            'size'                 => $file->getSize(),
-            'path'                 => $path,
-            'file_hash'            => $fileHash,
+            'user_id' => auth()->id(),
+            'original_name' => $file->getClientOriginalName(),
+            'filename' => $filename,
+            'mime_type' => $file->getMimeType(),
+            'size' => $file->getSize(),
+            'path' => $path,
+            'file_hash' => $fileHash,
             'cloudinary_public_id' => $cloudinaryResult['public_id'],
-            'cloudinary_url'       => $cloudinaryResult['url'],
-            'status'               => 'pending',
+            'cloudinary_url' => $cloudinaryResult['url'],
+            'status' => 'pending',
         ]);
 
         ProcessAssetAI::dispatch($asset->id);
@@ -91,7 +91,7 @@ class AssetApiController extends Controller
 
         return response()->json([
             'success' => true,
-            'data'    => $this->formatAsset($asset->fresh(['user', 'metadata', 'categories'])),
+            'data' => $this->formatAsset($asset->fresh(['user', 'metadata', 'categories'])),
         ], 201);
     }
 
@@ -102,7 +102,7 @@ class AssetApiController extends Controller
 
         return response()->json([
             'success' => true,
-            'data'    => $this->formatAsset($asset),
+            'data' => $this->formatAsset($asset),
         ]);
     }
 
@@ -114,17 +114,17 @@ class AssetApiController extends Controller
         }
 
         $request->validate([
-            'title'       => ['nullable', 'string', 'max:255'],
+            'title' => ['nullable', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:5000'],
-            'tags'        => ['nullable', 'string', 'max:1000'],
+            'tags' => ['nullable', 'string', 'max:1000'],
         ]);
 
         $asset->metadata()->updateOrCreate(
             ['asset_id' => $asset->id],
             [
-                'title'        => $request->title,
-                'description'  => $request->description,
-                'tags'         => $request->tags ? array_map('trim', explode(',', $request->tags)) : null,
+                'title' => $request->title,
+                'description' => $request->description,
+                'tags' => $request->tags ? array_map('trim', explode(',', $request->tags)) : null,
                 'ai_generated' => false,
             ]
         );
@@ -133,7 +133,7 @@ class AssetApiController extends Controller
 
         return response()->json([
             'success' => true,
-            'data'    => $this->formatAsset($asset->fresh(['user', 'metadata', 'categories'])),
+            'data' => $this->formatAsset($asset->fresh(['user', 'metadata', 'categories'])),
         ]);
     }
 
@@ -160,15 +160,15 @@ class AssetApiController extends Controller
     // POST /api/assets/{id}/variants
     public function variants(Asset $asset): JsonResponse
     {
-        if (!$asset->metadata) {
+        if (! $asset->metadata) {
             return response()->json([
                 'success' => false,
                 'message' => 'Este asset no tiene metadatos generados todavía.',
             ], 422);
         }
 
-        $variantsService = new AIVariantsService();
-        $variants        = $variantsService->generateVariants(
+        $variantsService = new AIVariantsService;
+        $variants = $variantsService->generateVariants(
             $asset->metadata->title ?? '',
             $asset->metadata->description ?? '',
             $asset->metadata->tags ?? []
@@ -182,7 +182,7 @@ class AssetApiController extends Controller
         }
 
         return response()->json([
-            'success'  => true,
+            'success' => true,
             'variants' => $variants,
         ]);
     }
@@ -191,24 +191,24 @@ class AssetApiController extends Controller
     private function formatAsset(Asset $asset): array
     {
         return [
-            'id'            => $asset->id,
+            'id' => $asset->id,
             'original_name' => $asset->original_name,
-            'mime_type'     => $asset->mime_type,
-            'size_kb'       => round($asset->size / 1024, 2),
-            'status'        => $asset->status,
+            'mime_type' => $asset->mime_type,
+            'size_kb' => round($asset->size / 1024, 2),
+            'status' => $asset->status,
             'url' => $asset->cloudinary_url
                     ?: (str_starts_with($asset->path, 'http')
                         ? $asset->path
-                        : asset('storage/' . $asset->path)),
-            'uploaded_by'   => $asset->user->name,
-            'metadata'      => $asset->metadata ? [
-                'title'        => $asset->metadata->title,
-                'description'  => $asset->metadata->description,
-                'tags'         => $asset->metadata->tags,
+                        : asset('storage/'.$asset->path)),
+            'uploaded_by' => $asset->user->name,
+            'metadata' => $asset->metadata ? [
+                'title' => $asset->metadata->title,
+                'description' => $asset->metadata->description,
+                'tags' => $asset->metadata->tags,
                 'ai_generated' => $asset->metadata->ai_generated,
             ] : null,
-            'categories' => $asset->categories->map(fn($c) => [
-                'id'   => $c->id,
+            'categories' => $asset->categories->map(fn ($c) => [
+                'id' => $c->id,
                 'name' => $c->name,
                 'slug' => $c->slug,
             ]),

@@ -5,9 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
+/**
+ * @property-read int|null $total Solo presente en resultados de consultas agregadas (selectRaw/groupBy)
+ * @property-read string|null $date Solo presente en resultados de consultas agregadas (selectRaw/groupBy)
+ */
 class Asset extends Model
 {
     use HasFactory;

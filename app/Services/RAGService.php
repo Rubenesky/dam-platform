@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use App\Models\Asset;
 use App\Models\ActivityLog;
+use App\Models\Asset;
 use App\Models\User;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Log;
 class RAGService
 {
     private string $apiKey;
+
     private string $apiUrl;
 
     public function __construct()
@@ -23,7 +24,7 @@ class RAGService
     public function query(string $userQuestion): string
     {
         // Paso 1: Recopilamos contexto real de la base de datos
-        $context = Cache::remember('rag_context', 300, fn() => $this->gatherContext());
+        $context = Cache::remember('rag_context', 300, fn () => $this->gatherContext());
 
         // Paso 2: Mandamos el contexto + pregunta a Gemini
         $prompt = "Eres un asistente inteligente de la plataforma DAM Platform, un sistema de gestión de activos digitales.
@@ -44,14 +45,15 @@ Responde en 1-3 frases máximo de forma conversacional.";
                 'contents' => [
                     [
                         'parts' => [
-                            ['text' => $prompt]
-                        ]
-                    ]
-                ]
+                            ['text' => $prompt],
+                        ],
+                    ],
+                ],
             ]);
 
             if ($response->failed()) {
                 Log::error('RAG error', ['response' => $response->body()]);
+
                 return 'Lo siento, no puedo responder en este momento. Inténtalo de nuevo.';
             }
 
@@ -59,6 +61,7 @@ Responde en 1-3 frases máximo de forma conversacional.";
 
         } catch (\Exception $e) {
             Log::error('RAG exception', ['error' => $e->getMessage()]);
+
             return 'Error al procesar tu pregunta. Inténtalo de nuevo.';
         }
     }
@@ -66,18 +69,18 @@ Responde en 1-3 frases máximo de forma conversacional.";
     private function gatherContext(): string
     {
         // Assets
-        $totalAssets     = Asset::count();
+        $totalAssets = Asset::count();
         $processedAssets = Asset::where('status', 'processed')->count();
-        $pendingAssets   = Asset::where('status', 'pending')->count();
+        $pendingAssets = Asset::where('status', 'pending')->count();
 
         // Assets por tipo
         $imageAssets = Asset::where('mime_type', 'like', 'image/%')->count();
-        $pdfAssets   = Asset::where('mime_type', 'like', 'application/pdf%')->count();
+        $pdfAssets = Asset::where('mime_type', 'like', 'application/pdf%')->count();
 
         // Assets este mes
         $assetsThisMonth = Asset::whereMonth('created_at', now()->month)
-                                ->whereYear('created_at', now()->year)
-                                ->count();
+            ->whereYear('created_at', now()->year)
+            ->count();
 
         // Assets esta semana
         $assetsThisWeek = Asset::where('created_at', '>=', now()->startOfWeek())->count();
@@ -86,44 +89,46 @@ Responde en 1-3 frases máximo de forma conversacional.";
         $assetsToday = Asset::whereDate('created_at', today())->count();
 
         // Usuario más activo
-        $mostActiveUser      = Asset::selectRaw('user_id, count(*) as total')
-                                    ->groupBy('user_id')
-                                    ->orderByDesc('total')
-                                    ->with('user')
-                                    ->first();
-        $mostActiveUserName  = $mostActiveUser && $mostActiveUser->user ? $mostActiveUser->user->name : 'Ninguno';
+        $mostActiveUser = Asset::selectRaw('user_id, count(*) as total')
+            ->groupBy('user_id')
+            ->orderByDesc('total')
+            ->with('user')
+            ->first();
+        $mostActiveUserName = $mostActiveUser && $mostActiveUser->user ? $mostActiveUser->user->name : 'Ninguno';
         $mostActiveUserTotal = $mostActiveUser ? $mostActiveUser->total : 0;
 
         // Últimos 5 assets subidos
         $recentAssets = Asset::with(['user', 'metadata'])
-                             ->latest()
-                             ->take(5)
-                             ->get()
-                             ->map(function($a) {
-                                 $title    = $a->metadata && $a->metadata->title ? $a->metadata->title : $a->original_name;
-                                 $name     = $a->user ? $a->user->name : 'Desconocido';
-                                 $date     = $a->created_at->format('d/m/Y');
-                                 return "'{$title}' subido por {$name} el {$date}";
-                             })
-                             ->join(', ');
+            ->latest()
+            ->take(5)
+            ->get()
+            ->map(function ($a) {
+                $title = $a->metadata && $a->metadata->title ? $a->metadata->title : $a->original_name;
+                $name = $a->user ? $a->user->name : 'Desconocido';
+                $date = $a->created_at->format('d/m/Y');
+
+                return "'{$title}' subido por {$name} el {$date}";
+            })
+            ->join(', ');
 
         // Usuarios
-        $totalUsers  = User::count();
-        $adminUsers  = User::where('role', 'admin')->count();
+        $totalUsers = User::count();
+        $adminUsers = User::where('role', 'admin')->count();
         $editorUsers = User::where('role', 'editor')->count();
         $viewerUsers = User::where('role', 'viewer')->count();
 
         // Actividad reciente
         $recentActivity = ActivityLog::with('user')
-                                     ->latest('created_at')
-                                     ->take(5)
-                                     ->get()
-                                     ->map(function($log) {
-                                         $name = $log->user ? $log->user->name : 'Desconocido';
-                                         $date = $log->created_at->format('d/m/Y H:i');
-                                         return "{$name} realizó '{$log->action}' el {$date}";
-                                     })
-                                     ->join(', ');
+            ->latest('created_at')
+            ->take(5)
+            ->get()
+            ->map(function ($log) {
+                $name = $log->user ? $log->user->name : 'Desconocido';
+                $date = $log->created_at->format('d/m/Y H:i');
+
+                return "{$name} realizó '{$log->action}' el {$date}";
+            })
+            ->join(', ');
 
         // Tamaño total
         $totalSizeKB = Asset::sum('size') / 1024;
@@ -156,7 +161,7 @@ USUARIOS:
 ACTIVIDAD RECIENTE:
 {$recentActivity}
 
-FECHA ACTUAL: " . now()->format('d/m/Y H:i') . "
-";
+FECHA ACTUAL: ".now()->format('d/m/Y H:i').'
+';
     }
 }

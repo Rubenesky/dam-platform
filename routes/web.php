@@ -13,8 +13,8 @@ Route::get('/', function () {
 });
 
 Route::get('/dashboard', [DashboardController::class, 'index'])
-     ->middleware(['auth', 'verified'])
-     ->name('dashboard');
+    ->middleware(['auth', 'verified'])
+    ->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     // Rutas de perfil
@@ -44,13 +44,13 @@ Route::middleware('auth')->group(function () {
     // Categorías — solo admins
     Route::middleware('role:admin')->group(function () {
         Route::resource('categories', CategoryController::class)
-             ->except(['show']);
+            ->except(['show']);
     });
 
     // Panel de administración — solo admins
     Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {
         Route::resource('users', UserController::class)
-             ->except(['create', 'store', 'show']);
+            ->except(['create', 'store', 'show']);
     });
 
     // Exportaciones — solo admins

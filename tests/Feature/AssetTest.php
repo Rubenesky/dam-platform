@@ -4,8 +4,10 @@ namespace Tests\Feature;
 
 use App\Models\Asset;
 use App\Models\User;
+use App\Services\CloudinaryService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
@@ -52,6 +54,28 @@ class AssetTest extends TestCase
     {
         Storage::fake('public');
 
+        Http::fake([
+            '*' => Http::response([
+                'candidates' => [
+                    [
+                        'content' => [
+                            'parts' => [
+                                ['text' => '{"title":"Imagen de prueba","description":"Descripcion de prueba","tags":["test","prueba","imagen"]}'],
+                            ],
+                        ],
+                    ],
+                ],
+            ], 200),
+        ]);
+
+        $this->mock(CloudinaryService::class, function ($mock) {
+            $mock->shouldReceive('upload')->once()->andReturn([
+                'public_id' => 'dam-platform/test-image',
+                'url' => 'https://res.cloudinary.com/test/image/upload/test-image.jpg',
+                'format' => 'jpg',
+            ]);
+        });
+
         $user = User::factory()->create(['role' => 'admin']);
         $file = UploadedFile::fake()->create('test-image.jpg', 100, 'image/jpeg');
 
@@ -61,7 +85,7 @@ class AssetTest extends TestCase
 
         $response->assertRedirect();
         $this->assertDatabaseHas('assets', [
-            'user_id'       => $user->id,
+            'user_id' => $user->id,
             'original_name' => 'test-image.jpg',
         ]);
     }
@@ -69,9 +93,9 @@ class AssetTest extends TestCase
     // Test 6: viewer no puede borrar assets
     public function test_viewer_cannot_delete_asset(): void
     {
-        $admin  = User::factory()->create(['role' => 'admin']);
+        $admin = User::factory()->create(['role' => 'admin']);
         $viewer = User::factory()->create(['role' => 'viewer']);
-        $asset  = Asset::factory()->create(['user_id' => $admin->id]);
+        $asset = Asset::factory()->create(['user_id' => $admin->id]);
 
         $response = $this->actingAs($viewer)->delete("/assets/{$asset->id}");
         $response->assertStatus(403);

@@ -2,17 +2,16 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use App\Models\ActivityLog;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, \Illuminate\Auth\MustVerifyEmail, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -46,7 +45,7 @@ class User extends Authenticatable
         'password' => 'hashed',
     ];
 
-        // Un usuario puede tener muchos assets
+    // Un usuario puede tener muchos assets
     public function assets(): HasMany
     {
         return $this->hasMany(Asset::class);
@@ -58,7 +57,7 @@ class User extends Authenticatable
         return $this->hasMany(ActivityLog::class);
     }
     // Comprueba si el usuario es admin
-    
+
     public function isAdmin(): bool
     {
         return $this->role === 'admin';

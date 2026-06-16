@@ -6,9 +6,10 @@ use App\Exports\AssetsExport;
 
 class ExportController extends Controller
 {
-    public function assets()
+    public function assets(): void
     {
-        $export = new AssetsExport();
-        return $export->download();
+        $export = new AssetsExport;
+
+        $export->download();
     }
 }

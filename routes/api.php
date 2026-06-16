@@ -20,12 +20,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', function (Request $request) {
         return response()->json([
             'success' => true,
-            'data'    => [
-                'id'    => $request->user()->id,
-                'name'  => $request->user()->name,
+            'data' => [
+                'id' => $request->user()->id,
+                'name' => $request->user()->name,
                 'email' => $request->user()->email,
-                'role'  => $request->user()->role,
-            ]
+                'role' => $request->user()->role,
+            ],
         ]);
     });
 
@@ -35,12 +35,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/assets/{asset}', [AssetApiController::class, 'show']);
     Route::get('/assets/{asset}/status', function (Asset $asset) {
         $asset->load('metadata');
+
         return response()->json([
-            'status'   => $asset->status,
+            'status' => $asset->status,
             'metadata' => $asset->metadata ? [
-                'title'        => $asset->metadata->title,
-                'description'  => $asset->metadata->description,
-                'tags'         => $asset->metadata->tags,
+                'title' => $asset->metadata->title,
+                'description' => $asset->metadata->description,
+                'tags' => $asset->metadata->tags,
                 'ai_generated' => $asset->metadata->ai_generated,
             ] : null,
         ]);

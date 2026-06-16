@@ -4,15 +4,15 @@ namespace App\Exports;
 
 use App\Models\Asset;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class AssetsExport
 {
     public function download(): void
     {
-        $spreadsheet = new Spreadsheet();
+        $spreadsheet = new Spreadsheet;
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setTitle('Assets');
 
@@ -53,7 +53,7 @@ class AssetsExport
         }
 
         // Descargar
-        $filename = 'assets-' . now()->format('Y-m-d') . '.xlsx';
+        $filename = 'assets-'.now()->format('Y-m-d').'.xlsx';
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header("Content-Disposition: attachment; filename=\"{$filename}\"");
 

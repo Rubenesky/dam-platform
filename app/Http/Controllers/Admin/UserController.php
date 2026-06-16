@@ -11,6 +11,7 @@ class UserController extends Controller
     public function index()
     {
         $users = User::latest()->paginate(15);
+
         return view('admin.users.index', compact('users'));
     }
 
@@ -37,7 +38,7 @@ class UserController extends Controller
         ]);
 
         return redirect()->route('admin.users.index')
-                         ->with('success', 'Usuario actualizado correctamente.');
+            ->with('success', 'Usuario actualizado correctamente.');
     }
 
     public function destroy(User $user)
@@ -50,6 +51,6 @@ class UserController extends Controller
         $user->delete();
 
         return redirect()->route('admin.users.index')
-                         ->with('success', 'Usuario eliminado correctamente.');
+            ->with('success', 'Usuario eliminado correctamente.');
     }
 }

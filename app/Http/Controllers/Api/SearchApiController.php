@@ -19,8 +19,8 @@ class SearchApiController extends Controller
         $userQuery = $request->input('query');
 
         // Parsear la query en lenguaje natural
-        $nlSearch = new NaturalLanguageSearchService();
-        $filters  = $nlSearch->parseQuery($userQuery);
+        $nlSearch = new NaturalLanguageSearchService;
+        $filters = $nlSearch->parseQuery($userQuery);
 
         // Si Gemini falló y no devolvió filtros, indicarlo
         if (empty($filters)) {
@@ -33,31 +33,31 @@ class SearchApiController extends Controller
         // Construir la consulta con los filtros
         $query = Asset::with(['user', 'metadata', 'categories']);
 
-        if (!empty($filters['search'])) {
+        if (! empty($filters['search'])) {
             $search = $filters['search'];
             $query->where(function ($q) use ($search) {
                 $q->where('original_name', 'like', "%{$search}%")
-                  ->orWhereHas('metadata', function ($q) use ($search) {
-                      $q->where('title', 'like', "%{$search}%")
-                        ->orWhere('description', 'like', "%{$search}%")
-                        ->orWhere('tags', 'like', "%{$search}%");
-                  });
+                    ->orWhereHas('metadata', function ($q) use ($search) {
+                        $q->where('title', 'like', "%{$search}%")
+                            ->orWhere('description', 'like', "%{$search}%")
+                            ->orWhere('tags', 'like', "%{$search}%");
+                    });
             });
         }
 
-        if (!empty($filters['type'])) {
-            $query->where('mime_type', 'like', $filters['type'] . '%');
+        if (! empty($filters['type'])) {
+            $query->where('mime_type', 'like', $filters['type'].'%');
         }
 
-        if (!empty($filters['status'])) {
+        if (! empty($filters['status'])) {
             $query->where('status', $filters['status']);
         }
 
-        if (!empty($filters['date_from'])) {
+        if (! empty($filters['date_from'])) {
             $query->whereDate('created_at', '>=', $filters['date_from']);
         }
 
-        if (!empty($filters['date_to'])) {
+        if (! empty($filters['date_to'])) {
             $query->whereDate('created_at', '<=', $filters['date_to']);
         }
 
@@ -65,22 +65,22 @@ class SearchApiController extends Controller
 
         return response()->json([
             'success' => true,
-            'query'   => $userQuery,
+            'query' => $userQuery,
             'filters' => $filters,
-            'total'   => $assets->count(),
-            'data'    => $assets->map(function ($asset) {
+            'total' => $assets->count(),
+            'data' => $assets->map(function ($asset) {
                 return [
-                    'id'            => $asset->id,
+                    'id' => $asset->id,
                     'original_name' => $asset->original_name,
-                    'mime_type'     => $asset->mime_type,
-                    'size_kb'       => round($asset->size / 1024, 2),
-                    'status'        => $asset->status,
-                    'url'           => asset('storage/' . $asset->path),
-                    'uploaded_by'   => $asset->user->name,
-                    'metadata'      => $asset->metadata ? [
-                        'title'       => $asset->metadata->title,
+                    'mime_type' => $asset->mime_type,
+                    'size_kb' => round($asset->size / 1024, 2),
+                    'status' => $asset->status,
+                    'url' => $asset->path,
+                    'uploaded_by' => $asset->user->name,
+                    'metadata' => $asset->metadata ? [
+                        'title' => $asset->metadata->title,
                         'description' => $asset->metadata->description,
-                        'tags'        => $asset->metadata->tags,
+                        'tags' => $asset->metadata->tags,
                     ] : null,
                     'created_at' => $asset->created_at->toISOString(),
                 ];

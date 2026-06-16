@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Storage;
 class GeminiService
 {
     private string $apiKey;
+
     private string $apiUrl;
 
     public function __construct()
@@ -28,6 +29,7 @@ class GeminiService
                 return $this->analyzeImageWithVision($filename, $mimeType, $storagePath);
             }
         }
+
         return $this->analyzeByFilename($filename, $mimeType);
     }
 
@@ -35,33 +37,34 @@ class GeminiService
     {
         try {
             $imageData = Http::get($imageUrl)->body();
-            $base64    = base64_encode($imageData);
+            $base64 = base64_encode($imageData);
 
-            $prompt = "Analiza esta imagen y genera metadatos en formato JSON con exactamente estas claves:
+            $prompt = 'Analiza esta imagen y genera metadatos en formato JSON con exactamente estas claves:
         - title: título descriptivo corto en español (máximo 60 caracteres)
         - description: descripción detallada de lo que ves en la imagen en español (máximo 200 caracteres)
         - tags: array de 5 etiquetas relevantes en español basadas en el contenido visual
-        Responde SOLO con el JSON, sin explicaciones ni formato markdown.";
+        Responde SOLO con el JSON, sin explicaciones ni formato markdown.';
 
             $response = Http::post("{$this->apiUrl}?key={$this->apiKey}", [
                 'contents' => [[
                     'parts' => [
                         ['inline_data' => ['mime_type' => $mimeType, 'data' => $base64]],
-                        ['text' => $prompt]
-                    ]
-                ]]
+                        ['text' => $prompt],
+                    ],
+                ]],
             ]);
 
             if ($response->failed()) {
                 Log::error('Gemini Vision URL error', ['response' => $response->body()]);
+
                 return $this->analyzeByFilename($filename, $mimeType);
             }
 
-            $text  = $response->json('candidates.0.content.parts.0.text');
+            $text = $response->json('candidates.0.content.parts.0.text');
             $clean = preg_replace('/```json|```/', '', $text);
-            $data  = json_decode(trim($clean), true);
+            $data = json_decode(trim($clean), true);
 
-            if (!$data || !isset($data['title'])) {
+            if (! $data || ! isset($data['title'])) {
                 return $this->analyzeByFilename($filename, $mimeType);
             }
 
@@ -69,6 +72,7 @@ class GeminiService
 
         } catch (\Exception $e) {
             Log::error('Gemini Vision URL exception', ['error' => $e->getMessage()]);
+
             return $this->analyzeByFilename($filename, $mimeType);
         }
     }
@@ -78,13 +82,13 @@ class GeminiService
         try {
             // Leemos la imagen y la convertimos a base64
             $imageData = Storage::disk('public')->get($storagePath);
-            $base64    = base64_encode($imageData);
+            $base64 = base64_encode($imageData);
 
-            $prompt = "Analiza esta imagen y genera metadatos en formato JSON con exactamente estas claves:
+            $prompt = 'Analiza esta imagen y genera metadatos en formato JSON con exactamente estas claves:
             - title: título descriptivo corto en español (máximo 60 caracteres)
             - description: descripción detallada de lo que ves en la imagen en español (máximo 200 caracteres)
             - tags: array de 5 etiquetas relevantes en español basadas en el contenido visual
-            Responde SOLO con el JSON, sin explicaciones ni formato markdown.";
+            Responde SOLO con el JSON, sin explicaciones ni formato markdown.';
 
             $response = Http::post("{$this->apiUrl}?key={$this->apiKey}", [
                 'contents' => [
@@ -93,17 +97,18 @@ class GeminiService
                             [
                                 'inline_data' => [
                                     'mime_type' => $mimeType,
-                                    'data'      => $base64,
-                                ]
+                                    'data' => $base64,
+                                ],
                             ],
-                            ['text' => $prompt]
-                        ]
-                    ]
-                ]
+                            ['text' => $prompt],
+                        ],
+                    ],
+                ],
             ]);
 
             if ($response->failed()) {
                 Log::error('Gemini Vision error', ['response' => $response->body()]);
+
                 return $this->analyzeByFilename($filename, $mimeType);
             }
 
@@ -111,9 +116,9 @@ class GeminiService
             Log::info('Gemini Vision response', ['text' => $text]);
 
             $clean = preg_replace('/```json|```/', '', $text);
-            $data  = json_decode(trim($clean), true);
+            $data = json_decode(trim($clean), true);
 
-            if (!$data || !isset($data['title'])) {
+            if (! $data || ! isset($data['title'])) {
                 return $this->analyzeByFilename($filename, $mimeType);
             }
 
@@ -121,6 +126,7 @@ class GeminiService
 
         } catch (\Exception $e) {
             Log::error('Gemini Vision exception', ['error' => $e->getMessage()]);
+
             return $this->analyzeByFilename($filename, $mimeType);
         }
     }
@@ -139,22 +145,23 @@ class GeminiService
                 'contents' => [
                     [
                         'parts' => [
-                            ['text' => $prompt]
-                        ]
-                    ]
-                ]
+                            ['text' => $prompt],
+                        ],
+                    ],
+                ],
             ]);
 
             if ($response->failed()) {
                 Log::error('Gemini API error', ['response' => $response->body()]);
+
                 return $this->defaultMetadata($filename);
             }
 
-            $text  = $response->json('candidates.0.content.parts.0.text');
+            $text = $response->json('candidates.0.content.parts.0.text');
             $clean = preg_replace('/```json|```/', '', $text);
-            $data  = json_decode(trim($clean), true);
+            $data = json_decode(trim($clean), true);
 
-            if (!$data || !isset($data['title'])) {
+            if (! $data || ! isset($data['title'])) {
                 return $this->defaultMetadata($filename);
             }
 
@@ -162,6 +169,7 @@ class GeminiService
 
         } catch (\Exception $e) {
             Log::error('Gemini Service exception', ['error' => $e->getMessage()]);
+
             return $this->defaultMetadata($filename);
         }
     }
@@ -169,9 +177,9 @@ class GeminiService
     private function defaultMetadata(string $filename): array
     {
         return [
-            'title'       => pathinfo($filename, PATHINFO_FILENAME),
+            'title' => pathinfo($filename, PATHINFO_FILENAME),
             'description' => 'Sin descripción generada.',
-            'tags'        => [],
+            'tags' => [],
         ];
     }
 }

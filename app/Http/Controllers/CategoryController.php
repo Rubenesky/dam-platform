@@ -11,9 +11,9 @@ class CategoryController extends Controller
     public function index()
     {
         $categories = Category::whereNull('parent_id')
-                              ->with('children')
-                              ->latest()
-                              ->get();
+            ->with('children')
+            ->latest()
+            ->get();
 
         return view('categories.index', compact('categories'));
     }
@@ -21,33 +21,34 @@ class CategoryController extends Controller
     public function create()
     {
         $categories = Category::whereNull('parent_id')->get();
+
         return view('categories.create', compact('categories'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'name'        => ['required', 'string', 'max:255'],
+            'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
-            'parent_id'   => ['nullable', 'exists:categories,id'],
+            'parent_id' => ['nullable', 'exists:categories,id'],
         ]);
 
         Category::create([
-            'name'        => $request->name,
-            'slug'        => Str::slug($request->name),
+            'name' => $request->name,
+            'slug' => Str::slug($request->name),
             'description' => $request->description,
-            'parent_id'   => $request->parent_id,
+            'parent_id' => $request->parent_id,
         ]);
 
         return redirect()->route('categories.index')
-                         ->with('success', 'Categoría creada correctamente.');
+            ->with('success', 'Categoría creada correctamente.');
     }
 
     public function edit(Category $category)
     {
         $categories = Category::whereNull('parent_id')
-                              ->where('id', '!=', $category->id)
-                              ->get();
+            ->where('id', '!=', $category->id)
+            ->get();
 
         return view('categories.edit', compact('category', 'categories'));
     }
@@ -55,20 +56,20 @@ class CategoryController extends Controller
     public function update(Request $request, Category $category)
     {
         $request->validate([
-            'name'        => ['required', 'string', 'max:255'],
+            'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
-            'parent_id'   => ['nullable', 'exists:categories,id'],
+            'parent_id' => ['nullable', 'exists:categories,id'],
         ]);
 
         $category->update([
-            'name'        => $request->name,
-            'slug'        => Str::slug($request->name),
+            'name' => $request->name,
+            'slug' => Str::slug($request->name),
             'description' => $request->description,
-            'parent_id'   => $request->parent_id,
+            'parent_id' => $request->parent_id,
         ]);
 
         return redirect()->route('categories.index')
-                         ->with('success', 'Categoría actualizada correctamente.');
+            ->with('success', 'Categoría actualizada correctamente.');
     }
 
     public function destroy(Category $category)
@@ -76,6 +77,6 @@ class CategoryController extends Controller
         $category->delete();
 
         return redirect()->route('categories.index')
-                         ->with('success', 'Categoría eliminada correctamente.');
+            ->with('success', 'Categoría eliminada correctamente.');
     }
 }

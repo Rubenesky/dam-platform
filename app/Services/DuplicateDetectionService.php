@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Log;
 class DuplicateDetectionService
 {
     private string $apiKey;
+
     private string $apiUrl;
 
     public function __construct()
@@ -41,10 +42,10 @@ class DuplicateDetectionService
         // Preparamos los datos para comparar
         $assetsData = $existingAssets->map(function ($asset) {
             return [
-                'id'          => $asset->id,
-                'title'       => $asset->metadata?->title ?? '',
+                'id' => $asset->id,
+                'title' => $asset->metadata?->title ?? '',
                 'description' => $asset->metadata?->description ?? '',
-                'tags'        => $asset->metadata?->tags ?? [],
+                'tags' => $asset->metadata?->tags ?? [],
             ];
         })->toArray();
 
@@ -52,38 +53,39 @@ class DuplicateDetectionService
 
 Nuevo asset subido:
 - Descripción: \"{$description}\"
-- Tags: " . implode(', ', $tags) . "
+- Tags: ".implode(', ', $tags).'
 
 Assets existentes:
-" . json_encode($assetsData, JSON_UNESCAPED_UNICODE) . "
+'.json_encode($assetsData, JSON_UNESCAPED_UNICODE).'
 
 Analiza si el nuevo asset es similar a alguno de los existentes basándote en la descripción y tags.
 Considera similar si comparten el mismo tema, contenido visual o contexto (similaridad > 70%).
 
 Responde SOLO con un JSON con este formato:
-{\"similar\": [{\"id\": 1, \"similarity\": 85, \"reason\": \"Mismo tipo de paisaje montañoso\"}]}
-Si no hay similares responde: {\"similar\": []}
-Solo JSON, sin explicaciones ni markdown.";
+{"similar": [{"id": 1, "similarity": 85, "reason": "Mismo tipo de paisaje montañoso"}]}
+Si no hay similares responde: {"similar": []}
+Solo JSON, sin explicaciones ni markdown.';
 
         try {
             $response = Http::post("{$this->apiUrl}?key={$this->apiKey}", [
                 'contents' => [
                     [
                         'parts' => [
-                            ['text' => $prompt]
-                        ]
-                    ]
-                ]
+                            ['text' => $prompt],
+                        ],
+                    ],
+                ],
             ]);
 
             if ($response->failed()) {
                 Log::error('Duplicate detection error', ['response' => $response->body()]);
+
                 return [];
             }
 
-            $text  = $response->json('candidates.0.content.parts.0.text');
+            $text = $response->json('candidates.0.content.parts.0.text');
             $clean = preg_replace('/```json|```/', '', $text);
-            $data  = json_decode(trim($clean), true);
+            $data = json_decode(trim($clean), true);
 
             Log::info('Duplicate detection result', ['data' => $data]);
 
@@ -91,6 +93,7 @@ Solo JSON, sin explicaciones ni markdown.";
 
         } catch (\Exception $e) {
             Log::error('Duplicate detection exception', ['error' => $e->getMessage()]);
+
             return [];
         }
     }

@@ -14,13 +14,13 @@ class AuthApiController extends Controller
     public function login(Request $request): JsonResponse
     {
         $request->validate([
-            'email'    => ['required', 'email'],
+            'email' => ['required', 'email'],
             'password' => ['required'],
         ]);
 
         $user = User::where('email', $request->email)->first();
 
-        if (!$user || !Hash::check($request->password, $user->password)) {
+        if (! $user || ! Hash::check($request->password, $user->password)) {
             throw ValidationException::withMessages([
                 'email' => ['Las credenciales no son correctas.'],
             ]);
@@ -32,13 +32,13 @@ class AuthApiController extends Controller
 
         return response()->json([
             'success' => true,
-            'token'   => $token,
-            'user'    => [
-                'id'    => $user->id,
-                'name'  => $user->name,
+            'token' => $token,
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
                 'email' => $user->email,
-                'role'  => $user->role,
-            ]
+                'role' => $user->role,
+            ],
         ]);
     }
 
@@ -56,13 +56,13 @@ class AuthApiController extends Controller
     {
         $adminEmail = config('app.admin_email');
 
-        if (!$adminEmail) {
+        if (! $adminEmail) {
             return response()->json(['message' => 'Not configured'], 404);
         }
 
         $user = \App\Models\User::where('email', $adminEmail)->first();
 
-        if (!$user) {
+        if (! $user) {
             return response()->json(['message' => 'User not found'], 404);
         }
 
