@@ -1,0 +1,12 @@
+dam_platform:
+  target: dev
+  outputs:
+    dev:
+      type: postgres
+      host: db
+      port: 5432
+      user: dam
+      password: ""
+      dbname: dam_platform
+      schema: analytics
+      threads: 1

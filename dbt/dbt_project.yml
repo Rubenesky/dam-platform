@@ -1,0 +1,8 @@
+name: dam_platform
+version: '1.0.0'
+config-version: 2
+profile: dam_platform
+model-paths: ["models"]
+models:
+  dam_platform:
+    +materialized: view

@@ -1,0 +1,12 @@
+version: 2
+sources:
+  - name: dam
+    database: dam_platform
+    schema: public
+    tables:
+      - name: assets
+      - name: users
+      - name: categories
+      - name: asset_category
+      - name: asset_metadata
+      - name: activity_log
