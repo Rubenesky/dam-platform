@@ -43,7 +43,7 @@ class ProcessAssetAI implements ShouldQueue
             $asset->cloudinary_url
         );
 
-        AssetMetadata::create([
+        $assetMetadata = AssetMetadata::create([
             'asset_id' => $asset->id,
             'title' => $metadata['title'],
             'description' => $metadata['description'],
@@ -52,22 +52,32 @@ class ProcessAssetAI implements ShouldQueue
         ]);
 
         $duplicateDetector = app(DuplicateDetectionService::class);
-        $duplicateDetector->findSimilar(
+        $similarAssets = $duplicateDetector->findSimilar(
             $asset->id,
             $metadata['description'] ?? '',
             $metadata['tags'] ?? []
         );
+
+        if (! empty($similarAssets)) {
+            $assetMetadata->update(['similar_assets' => $similarAssets]);
+
+            Log::info('Duplicate candidates found', [
+                'asset_id' => $asset->id,
+                'candidates' => count($similarAssets),
+            ]);
+        }
 
         $asset->update(['status' => 'processed']);
     }
 
     public function failed(\Throwable $exception): void
     {
-        Log::error('ProcessAssetAI permanently failed', [
+        Log::error('ProcessAssetAI job failed', [
             'asset_id' => $this->assetId,
             'error' => $exception->getMessage(),
+            'trace' => $exception->getTraceAsString(),
         ]);
 
-        Asset::where('id', $this->assetId)->update(['status' => 'failed']);
+        Asset::where('id', $this->assetId)->update(['status' => 'error']);
     }
 }

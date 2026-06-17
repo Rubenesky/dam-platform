@@ -13,12 +13,13 @@ class AssetMetadata extends Model
         'description',
         'tags',
         'ai_generated',
+        'similar_assets',
     ];
 
-    // Convierte el campo JSON tags en array PHP automáticamente
     protected $casts = [
         'tags' => 'array',
         'ai_generated' => 'boolean',
+        'similar_assets' => 'array',
     ];
 
     // Los metadatos pertenecen a un asset

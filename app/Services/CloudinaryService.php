@@ -5,6 +5,7 @@ namespace App\Services;
 use Cloudinary\Cloudinary;
 use Cloudinary\Configuration\Configuration;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Log;
 
 class CloudinaryService
 {
@@ -49,8 +50,19 @@ class CloudinaryService
         ];
     }
 
-    public function delete(string $publicId): void
+    public function delete(string $publicId): bool
     {
-        $this->cloudinary->uploadApi()->destroy($publicId);
+        try {
+            $result = $this->cloudinary->uploadApi()->destroy($publicId);
+
+            return $result['result'] === 'ok';
+        } catch (\Exception $e) {
+            Log::error('Cloudinary delete failed', [
+                'public_id' => $publicId,
+                'error' => $e->getMessage(),
+            ]);
+
+            return false;
+        }
     }
 }

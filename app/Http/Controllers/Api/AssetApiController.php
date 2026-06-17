@@ -17,6 +17,8 @@ class AssetApiController extends Controller
 {
     use LogsActivity;
 
+    public function __construct(private CloudinaryService $cloudinaryService) {}
+
     // GET /api/assets
     public function index(): JsonResponse
     {
@@ -67,8 +69,7 @@ class AssetApiController extends Controller
         }
 
         // Subir a Cloudinary
-        $cloudinary = app(CloudinaryService::class);
-        $cloudinaryResult = $cloudinary->upload($file);
+        $cloudinaryResult = $this->cloudinaryService->upload($file);
 
         $filename = Str::uuid().'.'.$file->getClientOriginalExtension();
         $path = $file->storeAs('assets', $filename, 'public');
@@ -145,6 +146,10 @@ class AssetApiController extends Controller
                 'success' => false,
                 'message' => 'No tienes permiso para eliminar assets.',
             ], 403);
+        }
+
+        if ($asset->cloudinary_public_id) {
+            $this->cloudinaryService->delete($asset->cloudinary_public_id);
         }
 
         Storage::disk('public')->delete($asset->path);
